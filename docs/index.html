@@ -291,6 +291,80 @@ Brynjólfur Gauti Guðrúnar Jónsson
 <p><img data-src="images/ukcp_data.png" style="width:100.0%"></p>
 </div></div>
 </section>
+<section id="latent-gaussian-models-lgms" class="slide level2" data-name="LGMs">
+<h2>Latent Gaussian Models (LGMs)</h2>
+<div>
+<ul>
+<li class="fragment"><strong>Three-level hierarchy</strong>
+<ol type="1">
+<li class="fragment"><em>Data:</em> <span class="math inline">\(y\mid \eta,\theta\sim\pi(y\mid\eta,\theta)\)</span><br>
+</li>
+<li class="fragment"><em>Latent field:</em> <span class="math inline">\(\eta\mid\theta\sim\mathcal N\bigl(\mu(\theta),\Sigma(\theta)\bigr)\)</span></li>
+<li class="fragment"><em>Hyper-parameters:</em> <span class="math inline">\(\theta\sim\pi(\theta)\)</span></li>
+</ol></li>
+<li class="fragment"><strong>Structured additive predictor</strong><br>
+<span class="math display">\[
+\eta_i=\beta_0+\textstyle\sum_k \beta_k z_{i,k}+\sum_j u_j a_{i,j}+\varepsilon_i
+\]</span></li>
+<li class="fragment"><strong>Why LGMs?</strong> Massive dimensionality, yet fast inference via sparsity and conjugacy.</li>
+</ul>
+</div>
+</section>
+<section id="extended-lgms-multivariate-link-functions" class="slide level2">
+<h2>Extended LGMs — multivariate link functions</h2>
+<div>
+<ul>
+<li class="fragment">Need to model several distributional parameters jointly (e.g., location, scale and shape in GEV).<br>
+</li>
+<li class="fragment">Define <strong>vector link</strong> <span class="math inline">\(g:\mathcal D\to\mathbb R^M\)</span><br>
+<span class="math display">\[g(\psi_i) = (\eta_{1,i},\dots,\eta_{M,i})^\top\]</span></li>
+<li class="fragment">Each component uses its own fixed/random-effect design:<br>
+<span class="math display">\[\eta_{m} = X_m\beta_m + A_m u_m + \varepsilon_m,\quad m=1,\dots,M\]</span></li>
+<li class="fragment">Greatly increases flexibility for spatio-temporal extremes and joint risk metrics.</li>
+</ul>
+</div>
+</section>
+<section id="max-and-smooth-big-picture" class="slide level2" data-name="Max-and-Smooth">
+<h2>Max-and-Smooth — big picture</h2>
+<div>
+<ul>
+<li class="fragment"><strong>Goal:</strong> accurate but <em>fast</em> Bayesian inference for (extended) LGMs with many replicates.<br>
+</li>
+<li class="fragment"><strong>Two stages</strong>
+<ol type="1">
+<li class="fragment"><strong>Max:</strong> approximate each replicate-specific likelihood by a Gaussian.<br>
+</li>
+<li class="fragment"><strong>Smooth:</strong> fuse those Gaussian pseudo-observations with the latent GMRF prior.</li>
+</ol></li>
+<li class="fragment">Preserves full-rank uncertainty while scaling to <span class="math inline">\(10^5+\)</span> latent variables.</li>
+</ul>
+</div>
+</section>
+<section id="max-step-gaussian-likelihood-surrogate" class="slide level2">
+<h2>Max step — Gaussian likelihood surrogate</h2>
+<div>
+<ul>
+<li class="fragment">Find MLE <span class="math inline">\(\hat\eta\)</span> and observed information <span class="math inline">\(I_{\eta y}\)</span>.<br>
+<span class="math display">\[\hat L(\eta\mid y)=\mathcal N\!\bigl(\eta\mid\hat\eta,\;I_{\eta y}^{-1}\bigr)\]</span></li>
+<li class="fragment">Block-diagonal across independent replicates → embarrassingly parallel.</li>
+</ul>
+</div>
+</section>
+<section id="smooth-step-gaussiangaussian-posterior" class="slide level2">
+<h2>Smooth step — Gaussian–Gaussian posterior</h2>
+<div>
+<p>Hierarchical pseudo-model <span class="math display">\[
+\begin{aligned}
+\hat\eta &amp;\mid \eta \;\sim\; \mathcal N\bigl(\eta, Q_{\eta y}^{-1}\bigr) \\
+\eta     &amp;\mid \nu \;\sim\; \mathcal N\bigl(Z\nu, Q_\varepsilon^{-1}\bigr) \\
+\nu      &amp;\mid \theta \;\sim\; \mathcal N\bigl(\mu_\nu, Q_\nu^{-1}\bigr).
+\end{aligned}
+\]</span></p>
+<ul>
+<li class="fragment">Combines all information in closed-form; sampling or Laplace/INLA possible.</li>
+</ul>
+</div>
+</section>
 <section id="max-and-smooth" class="slide level2">
 <h2>Max-and-Smooth</h2>
 <div class="columns" style="font-size:60%">

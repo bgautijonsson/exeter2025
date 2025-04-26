@@ -1,0 +1,194 @@
+% Chapter 4: Copula-Extended Max-and-Smooth
+
+In Chapters \ref{sec:lgm} and \ref{sec:copulas}, we established the foundations of Latent Gaussian Models (LGMs) with the Max \& Smooth inference approach and introduced the Matérn spatial copula for modeling dependence at the data level.
+
+This chapter presents a novel three-step inference approach that unifies these complementary methodologies, creating a comprehensive framework for modeling dependence at both parameter and data levels. Our approach extends the Max \& Smooth methodology to accommodate data-level dependence through copulas, while maintaining computational efficiency and proper uncertainty propagation. The resulting model---which we refer to as a Copula-Extended Latent Gaussian Model (CELGM)---combines the strengths of both approaches, offering enhanced flexibility for complex spatial and spatio-temporal applications.
+
+The inference procedure is as follows:
+\begin{enumerate}
+    \item \textbf{Step 1}: Estimate copula parameters from the empirical cumulative distribution function of the data
+    \item \textbf{Step 2}: Perform simultaneous maximum likelihood estimation across locations, treating copula parameters as fixed
+    \item \textbf{Step 3}: Spatial smoothing of the estimated parameters using a Gaussian-Gaussian model
+\end{enumerate}
+
+This approach is computationally efficient and properly accounts for uncertainty at all levels, given that the Gaussian-Gaussian model is a good approximation to the full model.
+
+\subsection{Model Formulation}
+
+\subsubsection{The Copula-Extended Latent Gaussian Model}
+We begin by formally defining the Copula-Extended Latent Gaussian Model (CELGM). As in standard LGMs, we consider data organized into $G$ groups, where each group $i$ represents a time point with observations across $S$ spatial locations. The key difference is that we no longer assume conditional independence across spatial locations given the latent parameters.
+
+Let $\mathbf{y}_i = (y_{i,1}, \ldots, y_{i,S})^T$ denote the observations for all spatial locations at time point $i$. In a CELGM, the joint distribution of $\mathbf{y}_i$ given parameters $\boldsymbol{\psi} = (\boldsymbol{\psi}_1, \ldots, \boldsymbol{\psi}_S)^T$, where $\boldsymbol{\psi}_s = (\psi_{1,s}, \ldots, \psi_{M,s})^T$ are the parameters for location $s$, is modeled through a copula:
+
+\begin{equation}
+    \pi(\mathbf{y}_i|\boldsymbol{\psi}, \boldsymbol{\gamma}) = c\left(F_{i,1}(y_{i,1}|\boldsymbol{\psi}_1), \ldots, F_{i,S}(y_{i,S}|\boldsymbol{\psi}_S); \boldsymbol{\gamma}\right) \prod_{s=1}^{S} f_{i,s}(y_{i,s}|\boldsymbol{\psi}_s),
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $c$ is the copula density with parameters $\boldsymbol{\gamma}$
+    \item $F_{i,s}$ is the cumulative distribution function for observation at spatial location $s$ at time $i$
+    \item $f_{i,s}$ is the corresponding probability density function
+\end{itemize}
+
+The parameters $\boldsymbol{\psi}_s$ for each spatial location are linked to latent Gaussian fields through a multivariate link function:
+
+\begin{equation}
+    \mathbf{g}(\boldsymbol{\psi}_s) = \boldsymbol{\eta}_s,
+\end{equation}
+
+where $\mathbf{g}: D \rightarrow \mathbb{R}^M$ is an $M$-variate link function, and $\boldsymbol{\eta}_s = (\eta_{1,s}, \ldots, \eta_{M,s})^T$.
+
+For each parameter type $m \in \{1, \ldots, M\}$, we specify a linear model for the latent parameters $\boldsymbol{\eta}_m = (\eta_{m,1}, \ldots, \eta_{m,S})^T$ across all spatial locations:
+
+\begin{equation}
+    \boldsymbol{\eta}_m = \mathbf{X}_m \boldsymbol{\beta}_m + \mathbf{A}_m \mathbf{u}_m + \boldsymbol{\epsilon}_m,
+\end{equation}
+
+where $\boldsymbol{\beta}_m$, $\mathbf{u}_m$, and $\boldsymbol{\epsilon}_m$ have Gaussian priors, as in standard LGMs.
+
+This formulation preserves the hierarchical structure of LGMs while incorporating spatial dependence at the data level through the copula. The model can be summarized hierarchically as:
+
+\begin{enumerate}
+    \item \textbf{Data level}: $\pi(\mathbf{y}|\boldsymbol{\psi}, \boldsymbol{\gamma}) = \prod_{i=1}^G \pi(\mathbf{y}_i|\boldsymbol{\psi}, \boldsymbol{\gamma})$, where each $\pi(\mathbf{y}_i|\boldsymbol{\psi}, \boldsymbol{\gamma})$ is given by the spatial copula model that captures dependence across locations at time point $i$.
+    
+    \item \textbf{Latent level}: $\pi(\boldsymbol{\eta}|\boldsymbol{\nu}, \boldsymbol{\theta}) = N(\boldsymbol{\eta}|\mathbf{Z}\boldsymbol{\nu}, \mathbf{Q}_{\boldsymbol{\epsilon}}^{-1})$, where $\boldsymbol{\nu}$ contains the fixed and random effects.
+    
+    \item \textbf{Hyperparameter level}: $\pi(\boldsymbol{\nu}|\boldsymbol{\theta}) = N(\boldsymbol{\nu}|\boldsymbol{\mu}_{\boldsymbol{\nu}}, \mathbf{Q}_{\boldsymbol{\nu}}^{-1})$ and $\pi(\boldsymbol{\theta})$ is the prior on hyperparameters.
+\end{enumerate}
+
+\subsubsection{Matérn Spatial Copula Specification}
+For spatial applications, we employ the Matérn spatial copula developed in Chapter \ref{sec:copulas}. Recall that this copula is a Gaussian copula with correlation matrix derived from a standardized Matérn-like precision matrix:
+
+\begin{equation}
+    \mathbf{Q} = (\mathbf{Q}_{\rho_1} \otimes \mathbf{I} + \mathbf{I} \otimes \mathbf{Q}_{\rho_2})^{\nu+1},
+\end{equation}
+
+where $\mathbf{Q}_{\rho_1}$ and $\mathbf{Q}_{\rho_2}$ are precision matrices for one-dimensional AR(1) processes, and $\nu$ is a smoothness parameter.
+
+The standardized precision matrix $\tilde{\mathbf{Q}} = \mathbf{D}\mathbf{Q}\mathbf{D}$ (where $\mathbf{D}$ is a diagonal matrix with entries $D_{ii} = \sqrt{\Sigma_{ii}}$) ensures that its inverse $\mathbf{R} = \tilde{\mathbf{Q}}^{-1}$ is a valid correlation matrix, as required for the Gaussian copula.
+
+The Matérn spatial copula is particularly appropriate for our CELGM framework because:
+\begin{enumerate}
+    \item It provides flexible modeling of spatial dependence with interpretable parameters
+    \item It connects naturally to the GMRF structure often used at the latent level
+    \item It enables efficient computation through spectral methods, as detailed in Chapter \ref{sec:copulas}
+\end{enumerate}
+
+The copula parameters $\boldsymbol{\gamma} = (\rho_1, \rho_2, \nu)^T$ control the spatial dependence structure at the data level, complementing the parameter-level dependence captured by the latent Gaussian fields.
+
+\subsection{The Three-Step Inference Approach}
+Direct Bayesian inference for the full CELGM would be computationally challenging due to the complex likelihood involving both the copula structure and the latent Gaussian fields. To address this challenge, we propose a three-step inference approach that decomposes the problem into manageable components while preserving the essential dependence structures and properly propagating uncertainty.
+
+\subsubsection{Step 1: Estimation of Copula Parameters}
+The first step focuses on estimating the copula parameters $\boldsymbol{\gamma}$ from the data, treating the marginal distributions as unknown and employing nonparametric methods.
+
+For each observation $y_{i,j}$, we compute its empirical CDF value:
+
+\begin{equation}
+    \hat{F}_{i,j}(y_{i,j}) = \frac{1}{n_i + 1} \sum_{k=1}^{n_i} \mathbf{1}(y_{i,k} \leq y_{i,j}),
+\end{equation}
+
+where $\mathbf{1}(\cdot)$ is the indicator function. The division by $n_i + 1$ rather than $n_i$ helps avoid boundary issues with the copula.
+
+These empirical CDF values are then transformed to the normal score space:
+
+\begin{equation}
+    z_{i,j} = \Phi^{-1}(\hat{F}_{i,j}(y_{i,j})),
+\end{equation}
+
+where $\Phi^{-1}$ is the quantile function of the standard normal distribution.
+
+Using these transformed values $\mathbf{z} = (z_{1,1}, \ldots, z_{G,n_G})^T$, we estimate the parameters of the Matérn spatial copula through maximum likelihood:
+
+\begin{equation}
+    \hat{\boldsymbol{\gamma}} = \arg\max_{\boldsymbol{\gamma}} \log c_{\boldsymbol{\gamma}}(\hat{F}_{1,1}(y_{1,1}), \ldots, \hat{F}_{G,n_G}(y_{G,n_G})).
+\end{equation}
+
+For the Gaussian copula, this is equivalent to:
+
+\begin{equation}
+    \hat{\boldsymbol{\gamma}} = \arg\max_{\boldsymbol{\gamma}} \left\{-\frac{1}{2}\log|\mathbf{R}(\boldsymbol{\gamma})| - \frac{1}{2}\mathbf{z}^T(\mathbf{R}(\boldsymbol{\gamma})^{-1} - \mathbf{I})\mathbf{z}\right\},
+\end{equation}
+
+where $\mathbf{R}(\boldsymbol{\gamma})$ is the correlation matrix induced by the Matérn spatial copula with parameters $\boldsymbol{\gamma}$.
+
+Optimization of the copula parameters can be performed using standard numerical optimization routines, such as L-BFGS or Nelder-Mead, with appropriate constraints on the parameters.
+
+\subsubsection{Step 2: Joint Maximum Likelihood Estimation}
+In the second step, we estimate the parameters $\boldsymbol{\psi}$ for all spatial locations simultaneously, treating the copula parameters $\hat{\boldsymbol{\gamma}}$ from Step 1 as fixed.
+
+The joint log-likelihood for all observations is:
+
+\begin{equation}
+    \ell(\boldsymbol{\psi}) = \log \pi(\mathbf{y}|\boldsymbol{\psi}, \hat{\boldsymbol{\gamma}}) = \sum_{i=1}^G \log \pi(\mathbf{y}_i|\boldsymbol{\psi}, \hat{\boldsymbol{\gamma}}).
+\end{equation}
+
+For the Gaussian copula, this can be written as:
+
+\begin{equation}
+    \ell(\boldsymbol{\psi}) = \sum_{i=1}^G \left[\log c_{\hat{\boldsymbol{\gamma}}}(F_{i,1}(y_{i,1}|\boldsymbol{\psi}_1), \ldots, F_{i,S}(y_{i,S}|\boldsymbol{\psi}_S)) + \sum_{s=1}^{S} \log f_{i,s}(y_{i,s}|\boldsymbol{\psi}_s)\right].
+\end{equation}
+
+Maximizing this likelihood yields the maximum likelihood estimates $\hat{\boldsymbol{\psi}}$ for all spatial locations. The observed information matrix $\mathbf{I}_{\boldsymbol{\psi}\mathbf{y}}$ is obtained as the negative Hessian of the log-likelihood evaluated at $\hat{\boldsymbol{\psi}}$:
+
+\begin{equation}
+    \mathbf{I}_{\boldsymbol{\psi}\mathbf{y}} = -\nabla^2 \ell(\boldsymbol{\psi})|_{\boldsymbol{\psi}=\hat{\boldsymbol{\psi}}}.
+\end{equation}
+
+\subsubsection{Step 3: Bayesian Inference with Gaussian-Gaussian Model}
+The final step applies the Smooth part of the Max \& Smooth methodology, treating the estimates from Step 2 as data for a Gaussian-Gaussian model.
+
+Let $\boldsymbol{\eta} = \mathbf{g}(\boldsymbol{\psi})$ be the transformed parameters. The maximum likelihood estimate $\hat{\boldsymbol{\eta}} = \mathbf{g}(\hat{\boldsymbol{\psi}})$ and observed information matrix $\mathbf{I}_{\boldsymbol{\eta}\mathbf{y}}$ from Step 2 are used to construct a Gaussian approximation to the likelihood:
+
+\begin{equation}
+    \hat{L}(\boldsymbol{\eta}|\mathbf{y}) = N(\boldsymbol{\eta}|\hat{\boldsymbol{\eta}}, \mathbf{I}_{\boldsymbol{\eta}\mathbf{y}}^{-1}).
+\end{equation}
+
+This approximated likelihood is then combined with the Gaussian prior on the latent field to form a Gaussian-Gaussian pseudo model:
+
+\begin{align}
+    \pi(\hat{\boldsymbol{\eta}}|\boldsymbol{\eta}, \mathbf{Q}_{\boldsymbol{\eta}\mathbf{y}}, \boldsymbol{\theta}) &= N(\hat{\boldsymbol{\eta}}|\boldsymbol{\eta}, \mathbf{Q}_{\boldsymbol{\eta}\mathbf{y}}^{-1}) \\
+    \pi(\boldsymbol{\eta}|\boldsymbol{\nu}, \boldsymbol{\theta}) &= N(\boldsymbol{\eta}|\mathbf{Z}\boldsymbol{\nu}, \mathbf{Q}_{\boldsymbol{\epsilon}}^{-1}) \\
+    \pi(\boldsymbol{\nu}|\boldsymbol{\theta}) &= N(\boldsymbol{\nu}|\boldsymbol{\mu}_{\boldsymbol{\nu}}, \mathbf{Q}_{\boldsymbol{\nu}}^{-1})
+\end{align}
+
+where $\mathbf{Q}_{\boldsymbol{\eta}\mathbf{y}} = \mathbf{I}_{\boldsymbol{\eta}\mathbf{y}}$.
+
+\subsection{Computational Implementation}
+The three-step inference approach for CELGMs requires careful computational implementation to handle the complexity of both the copula structure and the latent Gaussian fields. We implemented this approach using a combination of Template Model Builder (TMB) for the Max step and Hamiltonian Monte Carlo via Stan for the Smooth step, ensuring computational efficiency and accuracy.
+
+\subsubsection{Step 1: Efficient Copula Parameter Estimation}
+For the Matérn spatial copula, we employ the following approach:
+
+\begin{enumerate}
+    \item We compute empirical CDFs for each location and transform them to normal scores using the inverse standard normal CDF.
+    
+    \item Using these transformed values, we estimate the copula parameters $\boldsymbol{\gamma} = (\rho_1, \rho_2, \nu)$ through direct optimization of the copula log-likelihood.
+    
+    \item The resulting sparse precision matrix is then formed and passed to the Max step for parameter estimation.
+\end{enumerate}
+
+\subsubsection{Step 2: Joint Maximum Likelihood with Automatic Differentiation}
+The joint maximum likelihood estimation is implemented using automatic differentiation techniques, which provide efficient gradient and Hessian calculations crucial for optimizing complex likelihoods.
+
+\begin{enumerate}
+    \item \textbf{Copula integration}: We modified the traditional likelihood implementation for extreme value models by incorporating the Gaussian copula directly in the objective function. For each observation time point, we first compute the marginal GEV likelihood contributions, then transform the data to the copula space through probability integral transforms, and finally add the copula density contribution.
+    
+    \item \textbf{Parameter stability}: Special care is taken to ensure numerical stability of the GEV transformations, with safeguards to handle boundary cases where the probability integral transform approaches zero or one. This is particularly important for extreme value modeling where extreme quantiles can lead to computational challenges.
+    
+    \item \textbf{Hessian computation}: After optimization, we compute the Hessian matrix (observed information) in a sparse format. This enables efficient storage and manipulation of the matrix, which is particularly important for spatial problems with many locations.
+    
+    \item \textbf{Sparse Cholesky decomposition}: We compute and store the sparse Cholesky decomposition of the observed information matrix, which provides both numerical stability and computational efficiency for subsequent steps.
+\end{enumerate}
+
+\subsubsection{Step 3: Efficient Posterior Sampling}
+For the Bayesian inference with the Gaussian-Gaussian model, we employ Hamiltonian Monte Carlo (HMC) through the No-U-Turn Sampler (NUTS), implementing several computational strategies to achieve high efficiency:
+
+\begin{enumerate}
+    \item \textbf{Efficient sparse matrix representation}: The sparse Cholesky factor from Step 2 is represented as a collection of row indices, column indices, and non-zero values. This allows efficient computation of the likelihood contribution without forming full dense matrices.
+    
+    \item \textbf{Direct incorporation of pre-computed quantities}: We pre-compute quantities such as the log-determinant of the precision matrix to avoid redundant calculation during the MCMC sampling.
+    
+    \item \textbf{Spatial structure integration}: Parameter-level spatial smoothing is performed using the Besag-York-Mollié (BYM2) model.
+\end{enumerate}

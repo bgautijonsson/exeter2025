@@ -1,0 +1,94 @@
+\documentclass[11pt]{article}
+
+% Load essential packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage[numbers]{natbib}
+\usepackage[colorlinks,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{cleveref}
+
+% Page layout for standard academic paper
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% Math settings
+\allowdisplaybreaks
+\numberwithin{equation}{section}
+
+% Theorem environments
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+% Custom commands
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\text{Var}}
+\newcommand{\Cov}{\text{Cov}}
+\newcommand{\given}{\,|\,}
+
+\begin{document}
+
+\title{Copula-Extended Max-and-Smooth for Latent Gaussian Models With Data-Level Dependence}
+
+\author{Your Name\thanks{Department of Statistics, Your Institution. Email: your.email@institution.edu} \and
+Co-author Name\thanks{Department of Statistics, Co-author Institution. Email: coauthor.email@institution.edu}}
+
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+Abstract text goes here.
+\end{abstract}
+
+\section{Introduction}
+\input{chapters/01_introduction}
+
+\section{Latent Gaussian Models}
+\label{sec:lgm}
+\input{chapters/02_latent_gaussian_models}
+
+\section{Max-and-Smooth}
+\label{sec:maxsmooth}
+\input{chapters/03_max_and_smooth}
+
+\section{A Spatial Gaussian Copula}
+\label{sec:copulas}
+\input{chapters/04_copulas}
+
+\section{Copula-Extended Max-and-Smooth}
+\label{sec:extended}
+\input{chapters/05_copula_extended_max_and_smooth}
+
+\section{Simulation Study}
+\label{sec:simulation}
+\input{chapters/06_simulation_study}
+
+\section{Real Data Study}
+\label{sec:realdata}
+\input{chapters/07_real_data_study}
+
+\section{Conclusions}
+\label{sec:conclusion}
+\input{chapters/08_conclusions}
+
+\bibliographystyle{plainnat}
+\bibliography{bibliography}
+
+\end{document} 

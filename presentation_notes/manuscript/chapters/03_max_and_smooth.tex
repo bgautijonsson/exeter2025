@@ -1,0 +1,74 @@
+% Max & Smooth: A Two-Step Inference Approach
+
+\subsection{Overview and Motivation} \label{subsec:ms-overview}
+Max \& Smooth \citep{hrafnkelsson2021max} is a two-step approximate Bayesian inference method designed for extended LGMs with independent data replicates. It addresses the limitations of existing methods by providing an efficient and accurate inference scheme for models with multivariate link functions and high-dimensional latent fields.
+
+The key insight of Max \& Smooth is to approximate the likelihood function with a Gaussian density, which, when combined with the Gaussian prior for the latent field, results in a computationally tractable Gaussian-Gaussian model. This approach allows for fast and accurate Bayesian inference while properly propagating uncertainty from the data to the posterior distributions.
+
+Max \& Smooth is particularly well-suited for datasets with independent replicates, where the Gaussian approximation to the likelihood becomes increasingly accurate as the number of replicates grows, following the asymptotic behavior of likelihood functions \citep{schervish1995theory}.
+
+\subsection{Step 1: Gaussian Approximation of the Likelihood (Max)} \label{subsec:ms-step1}
+The first step of Max \& Smooth involves approximating the likelihood function with a Gaussian density. This approximation is performed for each group of independent data replicates separately, leveraging the conditional independence assumption.
+
+Let $L(\boldsymbol{\eta}|\mathbf{y})$ denote the likelihood function. We consider two different Gaussian approximations:
+
+\begin{enumerate}
+    \item \textbf{First Gaussian approximation} (based on the maximum likelihood estimate and observed information):
+    \begin{equation}
+        \hat{L}(\boldsymbol{\eta}|\mathbf{y}) = N(\boldsymbol{\eta}|\hat{\boldsymbol{\eta}}, \mathbf{\Sigma}_{\boldsymbol{\eta}\mathbf{y}})
+    \end{equation}
+    where $\hat{\boldsymbol{\eta}}$ is the maximum likelihood estimate of $\boldsymbol{\eta}$, and $\mathbf{\Sigma}_{\boldsymbol{\eta}\mathbf{y}} = (\mathbf{I}_{\boldsymbol{\eta}\mathbf{y}})^{-1}$, with $\mathbf{I}_{\boldsymbol{\eta}\mathbf{y}}$ being the observed information matrix evaluated at $\hat{\boldsymbol{\eta}}$.
+
+    \item \textbf{Second Gaussian approximation} (based on the mean and covariance of the normalized likelihood):
+    \begin{equation}
+        \tilde{L}(\boldsymbol{\eta}|\mathbf{y}) = N(\boldsymbol{\eta}|\tilde{\boldsymbol{\eta}}, \boldsymbol{\Omega}_{\boldsymbol{\eta}\mathbf{y}})
+    \end{equation}
+    where $\tilde{\boldsymbol{\eta}}$ and $\boldsymbol{\Omega}_{\boldsymbol{\eta}\mathbf{y}}$ are the mean and covariance matrix of the normalized likelihood function, respectively.
+\end{enumerate}
+
+For each group $i$, the likelihood contribution $L(\boldsymbol{\eta}_i|\mathbf{y}_i)$ is approximated independently. The approximated likelihood for the entire model is then:
+
+\begin{equation}
+    \hat{L}(\boldsymbol{\eta}|\mathbf{y}) = \prod_{i=1}^G \hat{L}(\boldsymbol{\eta}_i|\mathbf{y}_i) = N(\boldsymbol{\eta}|\hat{\boldsymbol{\eta}}, \mathbf{Q}_{\boldsymbol{\eta}\mathbf{y}}^{-1}),
+\end{equation}
+
+where $\mathbf{Q}_{\boldsymbol{\eta}\mathbf{y}} = \mathbf{\Sigma}_{\boldsymbol{\eta}\mathbf{y}}^{-1}$ is a block-diagonal precision matrix, with blocks corresponding to the inverse observed information matrices for each group.
+
+\subsection{Step 2: Bayesian Inference with the Gaussian-Gaussian Model (Smooth)} \label{subsec:ms-step2}
+In the second step of Max \& Smooth, we treat the estimates from the first step ($\hat{\boldsymbol{\eta}}$ or $\tilde{\boldsymbol{\eta}}$) as noisy measurements of the latent field, with known noise covariance matrices ($\mathbf{\Sigma}_{\boldsymbol{\eta}\mathbf{y}}$ or $\boldsymbol{\Omega}_{\boldsymbol{\eta}\mathbf{y}}$). This leads to a Gaussian-Gaussian pseudo model, which we can write hierarchically as:
+
+\begin{align}
+    \pi(\hat{\boldsymbol{\eta}}|\boldsymbol{\eta}, \mathbf{Q}_{\boldsymbol{\eta}\mathbf{y}}, \boldsymbol{\theta}) &= N(\hat{\boldsymbol{\eta}}|\boldsymbol{\eta}, \mathbf{Q}_{\boldsymbol{\eta}\mathbf{y}}^{-1}) \\
+    \pi(\boldsymbol{\eta}|\boldsymbol{\nu}, \boldsymbol{\theta}) &= N(\boldsymbol{\eta}|\mathbf{Z}\boldsymbol{\nu}, \mathbf{Q}_{\boldsymbol{\epsilon}}^{-1}) \\
+    \pi(\boldsymbol{\nu}|\boldsymbol{\theta}) &= N(\boldsymbol{\nu}|\boldsymbol{\mu}_{\boldsymbol{\nu}}, \mathbf{Q}_{\boldsymbol{\nu}}^{-1})
+\end{align}
+
+where $\boldsymbol{\nu}$ contains all the latent parameters that are assigned a Gaussian prior, and $\mathbf{Z}$ is a matrix that relates $\boldsymbol{\eta}$ to $\boldsymbol{\nu}$.
+
+The approximate posterior distribution can be written as:
+
+\begin{equation}
+    \hat{\pi}(\boldsymbol{\eta}, \boldsymbol{\nu}, \boldsymbol{\theta}|\mathbf{y}) \propto \pi(\boldsymbol{\theta}) \pi(\boldsymbol{\eta}, \boldsymbol{\nu}|\boldsymbol{\theta}) \hat{L}(\boldsymbol{\eta}|\mathbf{y}).
+\end{equation}
+
+\subsection{Implementation and Computational Considerations} \label{subsec:ms-implementation}
+The Max \& Smooth approach offers significant computational advantages for high-dimensional LGMs with independent data replicates:
+
+\begin{enumerate}
+    \item \textbf{Parallel computation}: The first step (Max) can be parallelized across groups, as the likelihood approximation for each group is performed independently.
+
+    \item \textbf{Sparse matrix operations}: When the precision matrices at the latent level are sparse (as is typical with GMRFs), sparse matrix algorithms can be employed for efficient computation in the second step (Smooth).
+
+    \item \textbf{Scalability with replicates}: The computational cost of the second step is insensitive to the number of data replicates, making Max \& Smooth particularly efficient for datasets with many replicates.
+\end{enumerate}
+
+\subsection{Limitations and Future Directions} \label{subsec:limitations}
+While Max \& Smooth provides an efficient inference framework for extended LGMs, it has several limitations that motivate further methodological developments:
+
+\begin{enumerate}
+    \item \textbf{Independent replicates}: The method is designed for datasets with independent replicates. For data with complex dependence structures at the observation level, the current formulation may not be directly applicable.
+
+    \item \textbf{Data-level dependence}: Max \& Smooth, like standard LGMs, focuses on modeling dependence at the parameter level through the latent Gaussian field. However, many applications require modeling dependence at the data level, especially when the data exhibit complex dependency patterns that cannot be fully captured by parameter-level modeling alone.
+
+    \item \textbf{Approximation accuracy}: The accuracy of the Gaussian approximation to the likelihood depends on the number of data replicates and the specific form of the data distribution. With a small number of replicates or heavily skewed distributions, the approximation may be less accurate.
+\end{enumerate} 

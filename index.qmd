@@ -75,6 +75,65 @@ library(evd)
 :::
 :::
 
+## Latent Gaussian Models (LGMs) {data-name="LGMs"}
+
+::: incremental
+- **Three-level hierarchy**  
+  1) *Data:* $y\mid \eta,\theta\sim\pi(y\mid\eta,\theta)$  
+  2) *Latent field:* $\eta\mid\theta\sim\mathcal N\bigl(\mu(\theta),\Sigma(\theta)\bigr)$
+  3) *Hyper-parameters:* $\theta\sim\pi(\theta)$
+- **Structured additive predictor**  
+  $$
+  \eta_i=\beta_0+\textstyle\sum_k \beta_k z_{i,k}+\sum_j u_j a_{i,j}+\varepsilon_i
+  $$
+- **Why LGMs?** Massive dimensionality, yet fast inference via sparsity and conjugacy.
+:::
+
+## Extended LGMs — multivariate link functions
+
+::: incremental
+- Need to model several distributional parameters jointly (e.g., location, scale and shape in GEV).  
+- Define **vector link** $g:\mathcal D\to\mathbb R^M$  
+  $$g(\psi_i) = (\eta_{1,i},\dots,\eta_{M,i})^\top$$ 
+- Each component uses its own fixed/random-effect design:  
+  $$\eta_{m} = X_m\beta_m + A_m u_m + \varepsilon_m,\quad m=1,\dots,M$$
+- Greatly increases flexibility for spatio-temporal extremes and joint risk metrics.
+:::
+
+## Max-and-Smooth — big picture {data-name="Max-and-Smooth"}
+
+::: incremental
+- **Goal:** accurate but *fast* Bayesian inference for (extended) LGMs with many replicates.  
+- **Two stages** 
+  1. **Max:** approximate each replicate-specific likelihood by a Gaussian.  
+  2. **Smooth:** fuse those Gaussian pseudo-observations with the latent GMRF prior.
+- Preserves full-rank uncertainty while scaling to $10^5+$ latent variables.
+:::
+
+## Max step — Gaussian likelihood surrogate
+
+::: incremental
+- Find MLE $\hat\eta$ and observed information $I_{\eta y}$.  
+  $$\hat L(\eta\mid y)=\mathcal N\!\bigl(\eta\mid\hat\eta,\;I_{\eta y}^{-1}\bigr)$$
+- Block-diagonal across independent replicates → embarrassingly parallel.
+:::
+
+## Smooth step — Gaussian–Gaussian posterior
+
+::: incremental
+Hierarchical pseudo-model
+$$
+\begin{aligned}
+\hat\eta &\mid \eta \;\sim\; \mathcal N\bigl(\eta, Q_{\eta y}^{-1}\bigr) \\
+\eta     &\mid \nu \;\sim\; \mathcal N\bigl(Z\nu, Q_\varepsilon^{-1}\bigr) \\
+\nu      &\mid \theta \;\sim\; \mathcal N\bigl(\mu_\nu, Q_\nu^{-1}\bigr).
+\end{aligned}
+$$
+
+- Combines all information in closed-form; sampling or Laplace/INLA possible.
+
+:::
+
 ## Max-and-Smooth
 
 ::: {.columns style="font-size:60%"}

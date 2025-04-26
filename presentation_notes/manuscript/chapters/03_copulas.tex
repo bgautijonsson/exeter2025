@@ -1,0 +1,153 @@
+% Chapter 3: Copulas and the Matérn Spatial Copula
+
+
+While Latent Gaussian Models (LGMs) provide a powerful framework for capturing parameter-level dependencies, they have limitations in modeling complex dependence structures at the data level. In Chapter 2, we introduced the Max \& Smooth approach for approximate Bayesian inference in LGMs, which efficiently handles parameter-level dependence. This chapter addresses the complementary challenge of modeling dependence at the data level through copulas, with a particular focus on spatial applications.
+
+\subsection{Essential Background}
+
+Copulas provide a mathematical framework for separating the dependence structure of a multivariate distribution from its marginal distributions. The cornerstone of copula theory is Sklar's theorem, which states that any multivariate distribution function $F$ with marginals $F_1,\ldots,F_d$ can be expressed as:
+
+\begin{equation}
+F(x_1,\ldots,x_d) = C(F_1(x_1),\ldots,F_d(x_d))
+\end{equation}
+
+where $C$ is a copula function. If the marginals are continuous, this copula is unique.
+
+The joint density function $f$ of a multivariate distribution can be expressed in terms of the copula density $c$ and the marginal densities $f_i$ as:
+
+\begin{equation}
+f(x_1,\ldots,x_d) = c(F_1(x_1),\ldots,F_d(x_d)) \prod_{i=1}^d f_i(x_i)
+\end{equation}
+
+This decomposition enables two-stage inference procedures where marginal distributions and dependence structure can be modeled separately, providing significant modeling flexibility.
+
+\subsection{Gaussian Copulas}
+The Gaussian copula is of particular interest for spatial modeling due to its connection with multivariate normal distributions and its analytical tractability. For a correlation matrix $\mathbf{R}$, the Gaussian copula is defined as:
+
+\begin{equation}
+C_{\mathbf{R}}^{\text{Gauss}}(u_1, \ldots, u_d) = \Phi_{\mathbf{R}}(\Phi^{-1}(u_1), \ldots, \Phi^{-1}(u_d))
+\end{equation}
+
+where $\Phi_{\mathbf{R}}$ is the joint CDF of a multivariate normal distribution with mean vector 0 and correlation matrix $\mathbf{R}$, and $\Phi^{-1}$ is the quantile function of the standard normal distribution.
+
+The density of the Gaussian copula is:
+
+\begin{equation}
+c_{\mathbf{R}}^{\text{Gauss}}(u_1, \ldots, u_d) = \frac{1}{|\mathbf{R}|^{1/2}} \exp\left(-\frac{1}{2}\mathbf{z}^T(\mathbf{R}^{-1} - \mathbf{I})\mathbf{z}\right)
+\end{equation}
+
+where $\mathbf{z} = (\Phi^{-1}(u_1), \ldots, \Phi^{-1}(u_d))^T$ and $\mathbf{I}$ is the identity matrix.
+
+A crucial observation is that the Gaussian copula is completely determined by the correlation matrix $\mathbf{R}$, which, by definition, has unit diagonal entries. This requirement becomes central to our methodological development in the context of precision-based spatial modeling.
+
+\subsection{Spatial Dependence Modeling}
+
+\subsubsection{Challenges in Spatial Copula Modeling}
+Spatial datasets present specific challenges for copula-based modeling:
+
+\begin{enumerate}
+\item \textbf{High dimensionality}: Spatial datasets often involve hundreds or thousands of locations.
+\item \textbf{Spatial consistency}: The dependence structure must respect spatial relationships.
+\item \textbf{Computational tractability}: Efficient methods are needed for high-dimensional models.
+\end{enumerate}
+
+\subsection{Gaussian Copulas for Spatial Data}
+For locations $\mathbf{s}_1, \ldots, \mathbf{s}_n$, a spatial Gaussian process is traditionally constructed by specifying a correlation function $\rho(\mathbf{s}_i, \mathbf{s}_j; \boldsymbol{\theta})$ that depends on the spatial locations and parameter vector $\boldsymbol{\theta}$.
+
+The Matérn correlation function is particularly flexible for spatial modeling:
+
+\begin{equation}
+\rho(\mathbf{s}_i, \mathbf{s}_j; \phi, \nu) = \frac{2^{1-\nu}}{\Gamma(\nu)}\left(\sqrt{2\nu}\frac{\|\mathbf{s}_i - \mathbf{s}_j\|}{\phi}\right)^{\nu}K_{\nu}\left(\sqrt{2\nu}\frac{\|\mathbf{s}_i - \mathbf{s}_j\|}{\phi}\right)
+\end{equation}
+
+where $K_{\nu}$ is the modified Bessel function of the second kind, $\phi$ is a range parameter, and $\nu$ is a smoothness parameter.
+
+However, constructing and manipulating the correlation matrix $\mathbf{R}$ directly becomes computationally prohibitive for large spatial datasets, motivating precision-based approaches.
+
+\subsection{GMRF-Based Approaches}
+Gaussian Markov Random Fields (GMRFs) offer computational advantages for large spatial datasets through sparse precision matrices. For spatial modeling with GMRFs, the precision matrix $\mathbf{Q}$ is typically constructed based on neighborhood relationships, leading to sparse structures that enable efficient computation.
+
+Recent developments have established connections between certain GMRFs and Gaussian fields with Matérn covariance functions through the stochastic partial differential equation (SPDE) approach. This connection allows approximating continuous spatial Gaussian fields using GMRFs, combining the flexibility of Matérn models with the computational efficiency of sparse precision matrices.
+
+However, a fundamental challenge arises when attempting to use GMRF precision structures for Gaussian copula modeling: Gaussian copulas require correlation matrices (matrices with unit diagonal entries), whereas the inverse of precision matrices from GMRFs do not generally have this property. This observation motivates our development of a systematic approach to construct precision matrices that, when inverted, produce valid correlation matrices.
+
+\subsection{The Matérn Spatial Copula}
+
+\subsubsection{Definition and Construction}
+We introduce the Matérn spatial copula for data on a regular grid, which combines the flexibility of the Matérn covariance function with the computational efficiency of GMRFs while ensuring that the inverse of the precision matrix yields a correlation matrix.
+
+For locations $\mathbf{s}_1, \ldots, \mathbf{s}_n$ on a regular grid, we define the precision matrix:
+
+\begin{equation}
+\mathbf{Q} = (\mathbf{Q}_{\rho_1} \otimes \mathbf{I} + \mathbf{I} \otimes \mathbf{Q}_{\rho_2})^{\nu+1}
+\end{equation}
+
+where $\mathbf{Q}_{\rho_1}$ and $\mathbf{Q}_{\rho_2}$ are precision matrices for one-dimensional AR(1) processes in the $x$ and $y$ directions, respectively, $\otimes$ denotes the Kronecker product, and $\nu$ is a smoothness parameter.
+
+The precision matrix $\mathbf{Q}_{\rho}$ for a one-dimensional AR(1) process with correlation parameter $\rho$ is given by:
+
+\begin{equation}
+\mathbf{Q}_{\rho} = \frac{1}{1-\rho^2}
+\begin{bmatrix}
+1 & -\rho & 0 & \cdots & 0 \\
+-\rho & 1+\rho^2 & -\rho & \cdots & 0 \\
+0 & -\rho & 1+\rho^2 & \cdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & 0 & \cdots & 1
+\end{bmatrix}
+\end{equation}
+
+After computing the diagonal entries of $\mathbf{\Sigma} = \mathbf{Q}^{-1}$, we standardize $\mathbf{Q}$ to obtain $\tilde{\mathbf{Q}} = \mathbf{D}\mathbf{Q}\mathbf{D}$, where $\mathbf{D}$ is a diagonal matrix with entries $D_{ii} = \sqrt{\Sigma_{ii}}$. The Matérn spatial copula is then defined as:
+
+\begin{equation}
+C_{\tilde{\mathbf{Q}}}^{\text{Matérn}}(u_1, \ldots, u_n) = \Phi_{\mathbf{R}}(\Phi^{-1}(u_1), \ldots, \Phi^{-1}(u_n))
+\end{equation}
+
+where $\mathbf{R} = \tilde{\mathbf{Q}}^{-1}$ is a correlation matrix.
+
+\subsection{Efficient Spectral Computation}
+The key computational challenge in working with the Matérn spatial copula is efficiently evaluating the copula density, which requires computing the log-determinant $\log|\mathbf{R}|$ and the quadratic form $\mathbf{z}^T(\mathbf{R}^{-1} - \mathbf{I})\mathbf{z}$ without explicitly forming the potentially massive $n_1 n_2 \times n_1 n_2$ precision matrix $\mathbf{Q}$.
+
+We exploit the spectral structure of $\mathbf{Q}$ to perform these computations efficiently. The eigenvalues and eigenvectors of $\mathbf{Q}$ can be derived from those of the much smaller matrices $\mathbf{Q}_{\rho_1}$ and $\mathbf{Q}_{\rho_2}$. Specifically, if $\mathbf{Q}_{\rho_1} = \mathbf{V}_1 \mathbf{\Lambda}_1 \mathbf{V}_1^T$ and $\mathbf{Q}_{\rho_2} = \mathbf{V}_2 \mathbf{\Lambda}_2 \mathbf{V}_2^T$, then the eigenvalues of $\mathbf{Q}$ are given by $(\lambda_{1,i} + \lambda_{2,j})^{\nu+1}$ for all pairs $(i,j)$, and the corresponding eigenvectors are $\mathbf{v}_{1,i} \otimes \mathbf{v}_{2,j}$.
+
+Rather than constructing $\mathbf{Q}$ explicitly, we iterate over the eigenvalue-eigenvector pairs of the smaller matrices to efficiently compute:
+
+\begin{enumerate}
+\item \textbf{Marginal variances} for standardization, by accumulating contributions from each eigenvalue-eigenvector pair:
+   \begin{equation}
+   \Sigma_{kk} = \sum_{i=1}^{n_1}\sum_{j=1}^{n_2} \frac{(\mathbf{v}_{1,i} \otimes \mathbf{v}_{2,j})_k^2}{(\lambda_{1,i} + \lambda_{2,j})^{\nu+1}}
+   \end{equation}
+
+\item \textbf{Log-determinant}, by summing over eigenvalues:
+   \begin{align}
+   \log|\tilde{\mathbf{Q}}| &= \log|\mathbf{D}\mathbf{Q}\mathbf{D}| = \log|\mathbf{Q}| + 2\sum_{i=1}^n \log D_{ii} \\
+   \log|\mathbf{Q}| &= (\nu+1)\sum_{i=1}^{n_1}\sum_{j=1}^{n_2} \log(\lambda_{1,i} + \lambda_{2,j})
+   \end{align}
+
+\item \textbf{Quadratic form}, by accumulating projections onto each eigenvector:
+   \begin{equation}
+   \mathbf{z}^T\tilde{\mathbf{Q}}\mathbf{z} = \sum_{i=1}^{n_1}\sum_{j=1}^{n_2} (\lambda_{1,i} + \lambda_{2,j})^{\nu+1} [(\mathbf{D}\mathbf{z})^T(\mathbf{v}_{1,i} \otimes \mathbf{v}_{2,j})]^2
+   \end{equation}
+\end{enumerate}
+
+This iterative approach completely avoids forming the full matrix $\mathbf{Q}$ or its inverse, making the computations tractable even for very large spatial grids.
+
+For even larger spatial fields, circulant approximations can further enhance computational efficiency. By approximating $\mathbf{Q}_{\rho_1}$ and $\mathbf{Q}_{\rho_2}$ with circulant matrices, the precision matrix $\mathbf{Q}$ becomes a block circulant matrix with circulant blocks (BCCB). This allows us to use the 2D Fast Fourier Transform (FFT) for efficient computation of the log-determinant and quadratic form, again without ever forming the full precision matrix.
+
+The folded circulant approximation further refines this approach by employing reflected boundary conditions, providing improved accuracy near the edges of the spatial domain while maintaining computational efficiency.
+
+\subsection{Properties and Advantages}
+The Matérn spatial copula offers several advantages for spatial modeling:
+
+\begin{enumerate}
+\item \textbf{Flexible spatial dependence}: The parameters $\rho_1$, $\rho_2$, and $\nu$ control the range of spatial dependence and the smoothness of the field.
+
+\item \textbf{Computational efficiency}: The precision-based formulation and spectral methods enable efficient computation even for large spatial grids.
+
+\item \textbf{Connection to GMRFs}: The approach establishes a direct link between GMRFs and copula models, leveraging the computational advantages of GMRFs while maintaining the flexibility of copula-based modeling.
+
+\item \textbf{Adaptability}: The framework can accommodate anisotropic dependence structures and can be extended to more complex precision matrices.
+\end{enumerate}
+
+This development addresses a fundamental challenge in spatial copula modeling: how to construct precision matrices whose inverses have unit diagonal entries, enabling the use of GMRF structures within the Gaussian copula framework.
+

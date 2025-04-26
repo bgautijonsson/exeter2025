@@ -1,0 +1,56 @@
+% Latent Gaussian Models
+
+\subsection{Model Structure} \label{subsubsec:model-structure}
+Latent Gaussian models constitute a class of Bayesian hierarchical models characterized by a three-level structure:
+
+\begin{enumerate}
+    \item \textbf{Data level}: The observations $\mathbf{y} = (y_1, \ldots, y_n)^T$ are modeled conditionally on latent parameters $\boldsymbol{\eta}$ and hyperparameters $\boldsymbol{\theta}$, with density $\pi(\mathbf{y}|\boldsymbol{\eta}, \boldsymbol{\theta})$.
+
+    \item \textbf{Latent level}: The latent parameters $\boldsymbol{\eta}$ follow a Gaussian distribution conditional on hyperparameters $\boldsymbol{\theta}$:
+    \begin{equation}
+        \pi(\boldsymbol{\eta}|\boldsymbol{\theta}) = \mathcal{N}(\boldsymbol{\eta}|\boldsymbol{\mu}(\boldsymbol{\theta}), \mathbf{\Sigma}(\boldsymbol{\theta})).
+    \end{equation}
+
+    \item \textbf{Hyperparameter level}: The hyperparameters $\boldsymbol{\theta}$ are assigned a prior density $\pi(\boldsymbol{\theta})$.
+\end{enumerate}
+
+The defining characteristic of LGMs is the Gaussian prior on the latent field $\boldsymbol{\eta}$. For computational efficiency, the latent field is often structured as a Gaussian Markov Random Field (GMRF) with a sparse precision matrix $\mathbf{Q}_{\boldsymbol{\eta}}(\boldsymbol{\theta}) = \mathbf{\Sigma}^{-1}(\boldsymbol{\theta})$, facilitating efficient inference even in high dimensions.
+
+In standard LGMs, as described by \cite{rue2009approximate}, a univariate link function connects a parameter of interest at the data level to a structured additive predictor at the latent level:
+
+\begin{equation}
+    g(\mu_i) = \eta_i,
+\end{equation}
+
+where $\mu_i = \mathrm{E}(y_i|\eta_i, \boldsymbol{\theta})$ or $\mu_i = Q_p(y_i|\eta_i, \boldsymbol{\theta})$ for some quantile function $Q_p$, and $g(\cdot)$ is the link function. The structured additive predictor $\eta_i$ typically takes the form:
+
+\begin{equation}
+    \eta_i = \beta_0 + \sum_{k=1}^K \beta_k z_{i,k} + \sum_{j=1}^J u_j a_{i,j} + \epsilon_i,
+\end{equation}
+
+where $\beta_0$ is an intercept, $\{\beta_k\}$ are linear fixed effects, $\{u_j\}$ are random effects with specified dependency structures, and $\{\epsilon_i\}$ are unstructured model errors.
+
+\subsubsection{Extended LGMs with Multivariate Link Functions} \label{subsubsec:ext-lgm}
+Many applications require modeling multiple parameters of the data distribution simultaneously, motivating the development of extended LGMs with multivariate link functions \citep{geirsson2020lgm}. In these models, multiple parameters of the data distribution are linked to separate latent Gaussian fields, providing greater flexibility in capturing complex data structures.
+
+For extended LGMs, we assume that the data can be grouped according to some structure (e.g., spatial locations, time points, or categories), with each group $i$ having $n_i$ observations. Let the total number of groups be $G$. For group $i$, the parameters are denoted by $\boldsymbol{\psi}_i = (\psi_{1,i}, \psi_{2,i}, \ldots, \psi_{M,i})^T \in D$, where $D$ is a subspace of $\mathbb{R}^M$ and $M$ is the number of parameters. The joint density for all observations is:
+
+\begin{equation}
+    \pi(\mathbf{y}|\boldsymbol{\psi}_1, \boldsymbol{\psi}_2, \ldots, \boldsymbol{\psi}_G) = \prod_{i=1}^G \pi(\mathbf{y}_i|\boldsymbol{\psi}_i) = \prod_{i=1}^G \prod_{j \in A_i} \pi(y_{i,j}|\boldsymbol{\psi}_i),
+\end{equation}
+
+where $A_i$ is the index set for group $i$.
+
+We define an $M$-variate link function $\mathbf{g}: D \rightarrow \mathbb{R}^M$ such that:
+
+\begin{equation}
+    \mathbf{g}(\boldsymbol{\psi}_i) = (\eta_{1,i}, \eta_{2,i}, \ldots, \eta_{M,i})^T = \boldsymbol{\eta}_i \in \mathbb{R}^M.
+\end{equation}
+
+For each parameter type $m \in \{1, \ldots, M\}$, we specify a linear model for the latent parameters $\boldsymbol{\eta}_m = (\eta_{m,1}, \ldots, \eta_{m,G})^T$:
+
+\begin{equation}
+    \boldsymbol{\eta}_m = \mathbf{X}_m \boldsymbol{\beta}_m + \mathbf{A}_m \mathbf{u}_m + \boldsymbol{\epsilon}_m,
+\end{equation}
+
+where $\boldsymbol{\beta}_m$ represents fixed effects, $\mathbf{X}_m$ is the corresponding design matrix, $\mathbf{u}_m$ represents random effects, $\mathbf{A}_m$ is the corresponding weight matrix, and $\boldsymbol{\epsilon}_m$ represents unstructured error terms. The terms $\boldsymbol{\beta}_m$, $\mathbf{u}_m$, and $\boldsymbol{\epsilon}_m$ are assigned Gaussian prior densities and are assumed to be a priori independent.
