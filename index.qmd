@@ -306,7 +306,7 @@ $$
 
 :::
 
-## Matérn-like Gaussian Copula {data-name="Copula"}
+## Matérn-like Gaussian Copula {data-name="Copulas"}
 
 ::: {style="font-size:55%"}
 
