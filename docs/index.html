@@ -114,7 +114,7 @@
     div.csl-indent {
       margin-left: 2em;
     }  </style>
-  <link rel="stylesheet" href="index_files/libs/revealjs/dist/theme/quarto-171fee62328150964744a2b96f6c2791.css">
+  <link rel="stylesheet" href="index_files/libs/revealjs/dist/theme/quarto-460c087478ec4e1f4e3e0492ab6cb399.css">
   <link href="index_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="index_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="index_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -276,6 +276,7 @@ Brynjólfur Gauti Guðrúnar Jónsson
 <li>Challenge: Modeling maximum daily precipitation in yearly blocks
 <ul>
 <li>43,920 spatial locations on a 180 x 244 grid</li>
+<li>Location-specitiv GEVt distributions</li>
 <li>Four parameters per location as in <span class="citation" data-cites="johannesson2021">[<a href="#/references" role="doc-biblioref" onclick="">4</a>]</span>
 <ul>
 <li>Location, Trend, Scale, Shape</li>
@@ -283,7 +284,7 @@ Brynjólfur Gauti Guðrúnar Jónsson
 </ul></li>
 <li>Two aspects of spatial dependence:
 <ol type="1">
-<li>GEV parameters (Spatial models)</li>
+<li>Parameter-level (Latent Gaussian Models)</li>
 <li>Data-level dependence (Copulas)</li>
 </ol></li>
 </ul>
@@ -293,66 +294,95 @@ Brynjólfur Gauti Guðrúnar Jónsson
 </section>
 <section id="latent-gaussian-models-lgms" class="slide level2" data-name="LGMs">
 <h2>Latent Gaussian Models (LGMs)</h2>
-<div>
 <ul>
-<li class="fragment"><strong>Three-level hierarchy</strong>
+<li><strong>Three-level hierarchy</strong>
 <ol type="1">
-<li class="fragment"><em>Data:</em> <span class="math inline">\(y\mid \eta,\theta\sim\pi(y\mid\eta,\theta)\)</span><br>
+<li><em>Data:</em> <span class="math inline">\(y\mid \eta,\theta\sim\pi(y\mid\eta,\theta)\)</span><br>
 </li>
-<li class="fragment"><em>Latent field:</em> <span class="math inline">\(\eta\mid\theta\sim\mathcal N\bigl(\mu(\theta),\Sigma(\theta)\bigr)\)</span></li>
-<li class="fragment"><em>Hyper-parameters:</em> <span class="math inline">\(\theta\sim\pi(\theta)\)</span></li>
+<li><em>Latent field:</em> <span class="math inline">\(\eta\mid\theta\sim\mathcal N\bigl(\mu(\theta),\Sigma(\theta)\bigr)\)</span></li>
+<li><em>Hyper-parameters:</em> <span class="math inline">\(\theta\sim\pi(\theta)\)</span></li>
 </ol></li>
-<li class="fragment"><strong>Structured additive predictor</strong><br>
+<li><strong>Structured additive predictor</strong><br>
 <span class="math display">\[
 \eta_i=\beta_0+\textstyle\sum_k \beta_k z_{i,k}+\sum_j u_j a_{i,j}+\varepsilon_i
 \]</span></li>
-<li class="fragment"><strong>Why LGMs?</strong> Massive dimensionality, yet fast inference via sparsity and conjugacy.</li>
+<li><strong>Why LGMs?</strong> Massive dimensionality, yet fast inference via sparsity and conjugacy.</li>
 </ul>
-</div>
+</section>
+<section id="lgms-a-concrete-example" class="slide level2">
+<h2>LGMs: A Concrete Example</h2>
+<ul>
+<li><strong>GEV model for precipitation extremes</strong>
+<ol type="1">
+<li><em>Data:</em> <span class="math inline">\(y_i \mid \mu_i, \sigma, \xi \sim \text{GEV}(\mu_i, \sigma, \xi)\)</span><br>
+</li>
+<li><em>Latent field:</em> <span class="math inline">\(\eta = (\log \mu_1, \ldots, \log \mu_n)^\top \sim \mathcal{N}(\boldsymbol{\mu}(\theta), \mathbf{Q}^{-1}(\theta))\)</span></li>
+<li><em>Hyper-parameters:</em> <span class="math inline">\(\theta =\)</span> f.ex. mean, range, variance, spatial correlation</li>
+</ol></li>
+<li><strong>Structured additive predictor for location parameter</strong><br>
+<span class="math display">\[
+\log(\mu_i) = \beta_0 + \beta_1 \text{elevation}_i + \beta_2 \text{trend}_i \cdot \text{year} + u_{\text{region}[i]} + \varepsilon_i
+\]</span></li>
+<li><strong>Why this matters:</strong> Location-specific location parameter with spatial dependence, while maintaining computational tractability for 43,920 locations.</li>
+</ul>
 </section>
 <section id="extended-lgms-multivariate-link-functions" class="slide level2">
 <h2>Extended LGMs — multivariate link functions</h2>
-<div>
 <ul>
-<li class="fragment">Need to model several distributional parameters jointly (e.g., location, scale and shape in GEV).<br>
+<li>Need to model several distributional parameters jointly (e.g., location, scale and shape in GEV).<br>
 </li>
-<li class="fragment">Define <strong>vector link</strong> <span class="math inline">\(g:\mathcal D\to\mathbb R^M\)</span><br>
+<li>Define <strong>vector link</strong> <span class="math inline">\(g:\mathcal D\to\mathbb R^M\)</span><br>
 <span class="math display">\[g(\psi_i) = (\eta_{1,i},\dots,\eta_{M,i})^\top\]</span></li>
-<li class="fragment">Each component uses its own fixed/random-effect design:<br>
+<li>Each component uses its own fixed/random-effect design:<br>
 <span class="math display">\[\eta_{m} = X_m\beta_m + A_m u_m + \varepsilon_m,\quad m=1,\dots,M\]</span></li>
-<li class="fragment">Greatly increases flexibility for spatio-temporal extremes and joint risk metrics.</li>
+<li>Greatly increases flexibility for spatio-temporal extremes and joint risk metrics.</li>
 </ul>
-</div>
+</section>
+<section id="extended-lgms---gev-example" class="slide level2">
+<h2>Extended LGMs - GEV Example</h2>
+<ul>
+<li><strong>Joint GEV model for precipitation extremes</strong>
+<ol type="1">
+<li><em>Data:</em> <span class="math inline">\(y_i \mid \mu_i, \sigma_i, \xi_i \sim \text{GEV}(\mu_i, \sigma_i, \xi_i)\)</span><br>
+</li>
+<li><em>Latent field:</em> <span class="math inline">\(\boldsymbol\eta_i = \begin{pmatrix} (\psi_1, \tau_1, \phi_1)^T \\  \vdots \\ (\psi_n, \tau_n, \phi_n)^T \end{pmatrix}  \sim \mathcal{N}(\boldsymbol{\mu}(\theta), \mathbf{Q}^{-1}(\theta))\)</span></li>
+</ol>
+<span class="math inline">\(\qquad(\psi_i, \tau_i, \phi_i) = (\log \mu_i, \log \sigma_i - \log \mu_i, f(\xi_i))\)</span>
+<ol start="3" type="1">
+<li><em>Hyper-parameters:</em> <span class="math inline">\(\theta =\)</span> f.ex. mean, range, variance, spatial correlation</li>
+</ol></li>
+</ul>
 </section>
 <section id="max-and-smooth-big-picture" class="slide level2" data-name="Max-and-Smooth">
 <h2>Max-and-Smooth — big picture</h2>
-<div>
 <ul>
-<li class="fragment"><strong>Goal:</strong> accurate but <em>fast</em> Bayesian inference for (extended) LGMs with many replicates.<br>
+<li><strong>Goal:</strong> accurate but <em>fast</em> Bayesian inference for (extended) LGMs with many replicates.<br>
 </li>
-<li class="fragment"><strong>Two stages</strong>
+<li><strong>Two stages</strong>
 <ol type="1">
-<li class="fragment"><strong>Max:</strong> approximate each replicate-specific likelihood by a Gaussian.<br>
+<li><strong>Max:</strong> approximate each location-specific likelihood by a Gaussian.<br>
 </li>
-<li class="fragment"><strong>Smooth:</strong> fuse those Gaussian pseudo-observations with the latent GMRF prior.</li>
+<li><strong>Smooth:</strong> fuse those Gaussian pseudo-observations with the latent GMRF prior.</li>
 </ol></li>
-<li class="fragment">Preserves full-rank uncertainty while scaling to <span class="math inline">\(10^5+\)</span> latent variables.</li>
+<li>Good when each group/location has many replicates (MLE asymptotically Gaussian)</li>
 </ul>
-</div>
 </section>
 <section id="max-step-gaussian-likelihood-surrogate" class="slide level2">
 <h2>Max step — Gaussian likelihood surrogate</h2>
-<div>
 <ul>
-<li class="fragment">Find MLE <span class="math inline">\(\hat\eta\)</span> and observed information <span class="math inline">\(I_{\eta y}\)</span>.<br>
-<span class="math display">\[\hat L(\eta\mid y)=\mathcal N\!\bigl(\eta\mid\hat\eta,\;I_{\eta y}^{-1}\bigr)\]</span></li>
-<li class="fragment">Block-diagonal across independent replicates → embarrassingly parallel.</li>
+<li>Loop over locations: estimate GEV parameters and observed information (Hessian) at each site</li>
+<li>For each location, <span class="math inline">\(i\)</span>:
+<ul>
+<li>Find MLE <span class="math inline">\(\hat\eta_i\)</span> and observed information <span class="math inline">\(I_{\eta\i y_i}\)</span>.<br>
+<span class="math display">\[
+\hat L(\eta_i\mid y_i)=\mathcal N\!\bigl(\eta_i\mid\hat\eta_i,\;I_{\eta_i y_i}^{-1}\bigr)
+\]</span></li>
+</ul></li>
+<li>Gather all MLEs into vector, <span class="math inline">\(\hat \eta\)</span>, arrange Hessians into <span class="math inline">\(Q_{\eta y}\)</span></li>
 </ul>
-</div>
 </section>
 <section id="smooth-step-gaussiangaussian-posterior" class="slide level2">
 <h2>Smooth step — Gaussian–Gaussian posterior</h2>
-<div>
 <p>Hierarchical pseudo-model <span class="math display">\[
 \begin{aligned}
 \hat\eta &amp;\mid \eta \;\sim\; \mathcal N\bigl(\eta, Q_{\eta y}^{-1}\bigr) \\
@@ -361,9 +391,9 @@ Brynjólfur Gauti Guðrúnar Jónsson
 \end{aligned}
 \]</span></p>
 <ul>
-<li class="fragment">Combines all information in closed-form; sampling or Laplace/INLA possible.</li>
+<li>Data-level likelihood uses MLEs and estimated Hessians</li>
+<li>Latent level applies spatial smoothing</li>
 </ul>
-</div>
 </section>
 <section id="max-and-smooth" class="slide level2">
 <h2>Max-and-Smooth</h2>
@@ -402,101 +432,60 @@ p(\eta, \theta \mid \hat{\eta}) \propto p(\hat{\eta} \mid \eta)p(\eta \mid \thet
 <p>where <span class="math inline">\(\eta\)</span> is the latent field, <span class="math inline">\(\theta\)</span> are hyperparameters, and <span class="math inline">\(\hat{\eta}\)</span> are the local MLEs.</p>
 </div>
 </section>
-<section id="calculating-multivariate-normal-densities" class="slide level2">
-<h2>Calculating Multivariate Normal Densities</h2>
-<div class="columns" style="font-size:60%">
-<p><span class="math display">\[
-\log f(\mathbf{x}) = \frac{1}{2}\left(\log |\mathbf{Q}| - \mathbf{x}^T\mathbf{Q}\mathbf{x}\right) + \mathrm{constant}
-\]</span></p><div class="column" style="width:50%;">
-<h3 id="computational-challenges">Computational challenges</h3>
-<ol type="1">
-<li><strong>Log Determinant</strong>: <span class="math inline">\(\log |\mathbf{Q}|\)</span>
+<section id="computational-implementation" class="slide level2">
+<h2>Computational Implementation</h2>
+<section id="efficient-two-stage-implementation" style="font-size:65%">
+<h3>Efficient Two-Stage Implementation</h3>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>Max Step (TMB)</strong></p>
 <ul>
-<li>Constant for a given precision matrix</li>
-</ul></li>
-<li><strong>Quadratic Form</strong>: <span class="math inline">\(\mathbf{x}^T\mathbf{Q}\mathbf{x}\)</span>
-<ul>
-<li>Needs calculation for each density evaluation</li>
-</ul></li>
-</ol>
-</div><div class="column" style="width:50%;">
-<h3 id="spatial-model-considerations">Spatial Model Considerations</h3>
-<ul>
-<li>Some models (e.g., ICAR) avoid log determinant calculation</li>
-<li>Efficient computation crucial for large-scale applications</li>
-<li>Fast algorithms when <span class="math inline">\(\mathbf{Q}\)</span> is sparse <span class="citation" data-cites="rue2001 rue2005">[<a href="#/references" role="doc-biblioref" onclick="">5</a>–<a href="#/references" role="doc-biblioref" onclick="">6</a>]</span></li>
+<li>Template Model Builder <span class="citation" data-cites="kristensen2016">[<a href="#/references" role="doc-biblioref" onclick="">5</a>]</span> for maximum likelihood</li>
+<li>Automatic differentiation</li>
+<li>Parallel processing of station-wise estimates</li>
+<li>Efficient sparse Hessians</li>
 </ul>
+</div><div class="column" style="width:50%;">
+<p><strong>Smooth Step (Stan)</strong></p>
+<ul>
+<li>Full Bayesian posterior via HMC <span class="citation" data-cites="carpenter2017">[<a href="#/references" role="doc-biblioref" onclick="">6</a>]</span></li>
+<li>BYM2 spatial prior implementation</li>
+<li>Scales well to large number of parameters</li>
+<li>Use <code>csr_times_vector()</code> for data-level likelihood</li>
+</ul>
+</div></div>
+<ol type="1">
+<li>Get MLEs and Hessians from TMB</li>
+<li>Pass <span class="math inline">\(\hat \eta\)</span> and CSR version of <span class="math inline">\(L_{\eta y}\)</span> into Stan</li>
+<li>Stan gives full posterior of Gaussian-Gaussian model</li>
+</ol>
+</section>
+</section>
+<section id="max-vs.-smooth" class="slide level2">
+<h2>Max vs.&nbsp;Smooth</h2>
+
+<img data-src="images/iid/max_smooth_compare.png" class="quarto-figure quarto-figure-center r-stretch"></section>
+<section id="section" class="slide level2">
+<h2></h2>
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><img data-src="images/iid/psi.png" style="width:100.0%"></p>
+</div><div class="column" style="width:33%;">
+<p><img data-src="images/iid/tau.png" style="width:100.0%"></p>
+</div><div class="column" style="width:33%;">
+<p><img data-src="images/iid/phi.png" style="width:100.0%"></p>
 </div></div>
 </section>
-<section id="spatial-models" class="slide level2">
-<h2>Spatial Models</h2>
-<div style="font-size:50%">
-<h4 id="conditional-autoregression-car-besag1974">Conditional Autoregression (CAR) <span class="citation" data-cites="besag1974">[<a href="#/references" role="doc-biblioref" onclick="">7</a>]</span></h4>
+<section id="section-1" class="slide level2">
+<h2></h2>
 <div class="columns">
-<div class="column" style="width:50%;">
-<ul>
-<li><span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix with <span class="math inline">\(D_{ii} = n_i\)</span>, the number of neighbours of <span class="math inline">\(i\)</span></li>
-<li><span class="math inline">\(\mathbf{A}\)</span> is the adjacency matrix with <span class="math inline">\(A_{ij} = A_{ji} = 1\)</span> if <span class="math inline">\(i \sim j\)</span></li>
-</ul>
-</div><div class="column" style="width:50%;">
-<p><span class="math display">\[
-\begin{aligned}
-\mathbf{x} &amp;\sim N(\mathbf{0}, \tau \mathbf{Q}) \\
-\mathbf{Q} &amp;= \mathbf{D}\left(\mathbf{I} - \alpha \mathbf{A} \right)
-\end{aligned}
-\]</span></p>
+<div class="column" style="width:33%;">
+<p><img data-src="images/iid/mu.png" style="width:100.0%"></p>
+</div><div class="column" style="width:33%;">
+<p><img data-src="images/iid/sigma.png" style="width:100.0%"></p>
+</div><div class="column" style="width:33%;">
+<p><img data-src="images/iid/xi.png" style="width:100.0%"></p>
 </div></div>
-<hr>
-<h4 id="intrinsic-conditional-autoregression-icar-besag1991">Intrinsic Conditional Autoregression (ICAR) <span class="citation" data-cites="besag1991">[<a href="#/references" role="doc-biblioref" onclick="">8</a>]</span></h4>
-<div class="columns">
-<div class="column" style="width:50%;">
-<ul>
-<li><span class="math inline">\(\alpha = 1\)</span>, so <span class="math inline">\(\mathbf Q\)</span> is singular, but constant</li>
-<li>Don’t have to calculate <span class="math inline">\(\log |\mathbf{Q}|\)</span></li>
-</ul>
-</div><div class="column" style="width:50%;">
-<p><span class="math display">\[
-\begin{aligned}
-\mathbf{x} &amp;\sim N(\mathbf{0}, \tau \mathbf{Q}) \\
-\mathbf{Q} &amp;= \mathbf{D} - \mathbf{A}
-\end{aligned}
-\]</span></p>
-</div></div>
-<hr>
-<div class="columns">
-<div class="column" style="width:50%;">
-<h4 id="bym-besag-york-mollié-model-besag1991">BYM (Besag-York-Mollié) Model <span class="citation" data-cites="besag1991">[<a href="#/references" role="doc-biblioref" onclick="">8</a>]</span></h4>
-<ul>
-<li><span class="math inline">\(\mathbf{u}\)</span> is the structured spatial component (Besag model)</li>
-<li><span class="math inline">\(\mathbf{v}\)</span> is the unstructured component (i.i.d. normal)</li>
-</ul>
-</div><div class="column" style="width:50%;">
-<p><span class="math display">\[
-\begin{aligned}
-\mathbf{x} &amp;= \mathbf{u} + \mathbf{v} \\
-\mathbf{u} &amp;\sim \mathrm{ICAR}(\tau_u) \\
-\mathbf{v} &amp;\sim N(\mathbf{0}, \tau_v^{-1})
-\end{aligned}
-\]</span></p>
-</div></div>
-<hr>
-<div class="columns">
-<div class="column" style="width:50%;">
-<h4 id="bym2-model-riebler2016-simpson2015">BYM2 Model <span class="citation" data-cites="riebler2016 simpson2015">[<a href="#/references" role="doc-biblioref" onclick="">9</a>–<a href="#/references" role="doc-biblioref" onclick="">10</a>]</span></h4>
-<ul>
-<li><span class="math inline">\(\rho\)</span> models how much of variance is spatial</li>
-<li><span class="math inline">\(s\)</span> is a scaling factor chosen to make <span class="math inline">\(\mathrm{Var}(\mathbf u_i) \approx 1\)</span></li>
-</ul>
-</div><div class="column" style="width:50%;">
-<p><span class="math display">\[
-\begin{aligned}
-\mathbf{x} &amp;= \left(\left(\sqrt{\rho/s}\right)\mathbf{u} + \left(\sqrt{1 - \rho}\right) \mathbf{v} \right)\sigma \\
-\mathbf{u} &amp;\sim \mathrm{ICAR}(1) \\
-\mathbf{v} &amp;\sim N(\mathbf{0}, n)
-\end{aligned}
-\]</span></p>
-</div></div>
-</div>
 </section>
 <section id="from-data-level-independence-to-dependence" class="slide level2">
 <h2>From Data-level Independence to Dependence</h2>
@@ -557,10 +546,10 @@ u_i &amp;= F_{\mathrm{GEV}}(x_i \vert \mu_i, \sigma_i, \xi_i)
 <h3 id="gaussian-copula">Gaussian Copula</h3>
 <div class="column" style="width:50%;">
 <ul>
-<li>Matérn-like precision matrix <span class="math inline">\(\mathbf{Q}\)</span> <span class="citation" data-cites="lindgren2011">[<a href="#/references" role="doc-biblioref" onclick="">11</a>]</span></li>
+<li>Matérn-like precision matrix <span class="math inline">\(\mathbf{Q}\)</span> <span class="citation" data-cites="lindgren2011">[<a href="#/references" role="doc-biblioref" onclick="">7</a>]</span></li>
 <li>If <span class="math inline">\(\mathbf{Q} = \mathbf{I}\)</span> simplifies to independent margins</li>
 <li>Scaled so <span class="math inline">\(\boldsymbol{\Sigma} = \mathbf{Q}^{-1}\)</span> is correlation matrix</li>
-<li>Need to calculate marginal variances <span class="citation" data-cites="rue2005a rue2007 rue2009">[<a href="#/references" role="doc-biblioref" onclick="">12</a>–<a href="#/references" role="doc-biblioref" onclick="">14</a>]</span></li>
+<li>Need to calculate marginal variances <span class="citation" data-cites="rue2005a rue2007 rue2009">[<a href="#/references" role="doc-biblioref" onclick="">8</a>–<a href="#/references" role="doc-biblioref" onclick="">10</a>]</span></li>
 <li>How to generate, scale and compute with <span class="math inline">\(\mathbf{Q}\)</span> quickly (for MCMC)?</li>
 </ul>
 </div><div class="column" style="width:50%;">
@@ -576,7 +565,7 @@ u_i &amp;= F_{\mathrm{GEV}}(x_i \vert \mu_i, \sigma_i, \xi_i)
 <section id="the-precision-matrix" class="slide level2">
 <h2>The Precision Matrix</h2>
 <div style="font-size:60%">
-<p><span class="math inline">\(\mathbf Q\)</span> defined as Kronecker sum of two AR(1) precision matrices, similar to <span class="citation" data-cites="lindgren2011">[<a href="#/references" role="doc-biblioref" onclick="">11</a>]</span></p>
+<p><span class="math inline">\(\mathbf Q\)</span> defined as Kronecker sum of two AR(1) precision matrices, similar to <span class="citation" data-cites="lindgren2011">[<a href="#/references" role="doc-biblioref" onclick="">7</a>]</span></p>
 <p><span class="math display">\[
 \mathbf{Q} = \left( \mathbf{Q}_{\rho_1} \otimes \mathbf{I_{n_2}} + \mathbf{I_{n_1}} \otimes \mathbf{Q}_{\rho_2} \right)^{\nu + 1}, \quad \nu \in \{0, 1, 2\}
 \]</span></p>
@@ -615,7 +604,7 @@ u_i &amp;= F_{\mathrm{GEV}}(x_i \vert \mu_i, \sigma_i, \xi_i)
 </div>
 </section>
 <section id="connection-to-spde-approach-lindgren2011" class="slide level2">
-<h2>Connection to SPDE approach <span class="citation" data-cites="lindgren2011">[<a href="#/references" role="doc-biblioref" onclick="">11</a>]</span></h2>
+<h2>Connection to SPDE approach <span class="citation" data-cites="lindgren2011">[<a href="#/references" role="doc-biblioref" onclick="">7</a>]</span></h2>
 <div class="columns" style="font-size:60%">
 <div class="column" style="width:50%;">
 <ul>
@@ -651,7 +640,7 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 <section id="eigendecomposition" class="slide level2">
 <h2>Eigendecomposition</h2>
 <div class="columns" style="font-size:65%">
-<p>Because of how <span class="math inline">\(\mathbf{Q}\)</span> is defined <span class="citation" data-cites="horn1991">[<a href="#/references" role="doc-biblioref" onclick="">15</a>]</span>, we know that</p><p><span class="math display">\[
+<p>Because of how <span class="math inline">\(\mathbf{Q}\)</span> is defined <span class="citation" data-cites="horn1991">[<a href="#/references" role="doc-biblioref" onclick="">11</a>]</span>, we know that</p><p><span class="math display">\[
 \begin{aligned}
 \mathbf{Q} &amp;= \mathbf{V}\boldsymbol{\Lambda}^{\nu + 1}\mathbf{V} \\
 &amp;= (\mathbf{V_{\rho_1}} \otimes \mathbf{V_{\rho_2}})(\boldsymbol \Lambda_{\rho_1} \otimes \mathbf{I} + \mathbf{I} \otimes \boldsymbol \Lambda_{\rho_2})^{\nu + 1}(\mathbf{V_{\rho_1}} \otimes \mathbf{V_{\rho_2}})^T
@@ -696,7 +685,7 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 </section>
 <section id="marginal-standard-deviations-1" class="slide level2">
 <h2>Marginal Standard Deviations</h2>
-<div class="columns" style="font-size:75%">
+<div class="columns" style="font-size:60%">
 <div class="column" style="width:58%;">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a>dim1 <span class="ot">&lt;-</span> <span class="dv">50</span>; dim2 <span class="ot">&lt;-</span> <span class="dv">50</span></span>
@@ -728,7 +717,7 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 <span id="cb2-12"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div></div>
-<div style="font-size:75%">
+<div style="font-size:65%">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>bench<span class="sc">::</span><span class="fu">mark</span>(</span>
 <span id="cb3-2"><a href=""></a>  <span class="st">"solve"</span> <span class="ot">=</span> <span class="fu">solve</span>(Q) <span class="sc">|&gt;</span> <span class="fu">diag</span>() <span class="sc">|&gt;</span> <span class="fu">sqrt</span>() <span class="sc">|&gt;</span> <span class="fu">sort</span>(),</span>
@@ -784,18 +773,17 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 </section>
 <section id="maximum-likelihood" class="slide level2">
 <h2>Maximum Likelihood</h2>
-<div class="columns" style="font-size:50%">
+<div class="columns" style="font-size:45%">
 <div class="column" style="width:60%;">
 <p><strong>Setup</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="fu">library</span>(stdmatern)</span>
 <span id="cb5-2"><a href=""></a>dim1 <span class="ot">&lt;-</span> <span class="dv">50</span>; dim2 <span class="ot">&lt;-</span> <span class="dv">50</span></span>
 <span id="cb5-3"><a href=""></a>rho1 <span class="ot">&lt;-</span> <span class="fl">0.9</span>; rho2 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb5-4"><a href=""></a>nu <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb5-5"><a href=""></a>n_obs <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb5-6"><a href=""></a>Z <span class="ot">&lt;-</span> <span class="fu">rmatern_copula_eigen</span>(n_obs, dim1, dim2, rho1, rho2, nu)</span>
-<span id="cb5-7"><a href=""></a>U <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Z)</span>
-<span id="cb5-8"><a href=""></a>Y <span class="ot">&lt;-</span> <span class="fu">qgev</span>(U, <span class="at">loc =</span> <span class="dv">6</span>, <span class="at">scale =</span> <span class="dv">2</span>, <span class="at">shape =</span> <span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-4"><a href=""></a>nu <span class="ot">&lt;-</span> <span class="dv">1</span>; n_obs <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb5-5"><a href=""></a>Z <span class="ot">&lt;-</span> <span class="fu">rmatern_copula_eigen</span>(n_obs, dim1, dim2, rho1, rho2, nu)</span>
+<span id="cb5-6"><a href=""></a>U <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Z)</span>
+<span id="cb5-7"><a href=""></a>Y <span class="ot">&lt;-</span> <span class="fu">qgev</span>(U, <span class="at">loc =</span> <span class="dv">6</span>, <span class="at">scale =</span> <span class="dv">2</span>, <span class="at">shape =</span> <span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Log-likelihood</strong></p>
 <div class="cell">
@@ -815,17 +803,15 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 <p><strong>Optimize</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>tictoc<span class="sc">::</span><span class="fu">tic</span>()</span>
-<span id="cb7-2"><a href=""></a>res <span class="ot">&lt;-</span> <span class="fu">optim</span>(</span>
-<span id="cb7-3"><a href=""></a>  <span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
-<span id="cb7-4"><a href=""></a>  log_lik,</span>
-<span id="cb7-5"><a href=""></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">fnscale =</span> <span class="sc">-</span><span class="dv">1</span>),</span>
-<span id="cb7-6"><a href=""></a>  <span class="at">Y =</span> Y,</span>
-<span id="cb7-7"><a href=""></a>  <span class="at">hessian =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb7-8"><a href=""></a>  <span class="at">method =</span> <span class="st">"L-BFGS-B"</span></span>
-<span id="cb7-9"><a href=""></a>)</span>
-<span id="cb7-10"><a href=""></a>tictoc<span class="sc">::</span><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-2"><a href=""></a>res <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb7-3"><a href=""></a>  log_lik,</span>
+<span id="cb7-4"><a href=""></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">fnscale =</span> <span class="sc">-</span><span class="dv">1</span>),</span>
+<span id="cb7-5"><a href=""></a>  <span class="at">Y =</span> Y,</span>
+<span id="cb7-6"><a href=""></a>  <span class="at">hessian =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-7"><a href=""></a>  <span class="at">method =</span> <span class="st">"L-BFGS-B"</span>)</span>
+<span id="cb7-8"><a href=""></a>tictoc<span class="sc">::</span><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>3.787 sec elapsed</code></pre>
+<pre><code>2.265 sec elapsed</code></pre>
 </div>
 </div>
 </div><div class="column" style="width:40%;">
@@ -1310,33 +1296,33 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 <tbody class="gt_table_body">
 <tr class="odd">
 <td class="gt_row gt_left" headers="par"><b>μ<sub></sub></b></td>
-<td class="gt_row gt_right" headers="estimate">6.068</td>
-<td class="gt_row gt_right" headers="lower">5.851</td>
-<td class="gt_row gt_right" headers="upper">6.293</td>
+<td class="gt_row gt_right" headers="estimate">6.247</td>
+<td class="gt_row gt_right" headers="lower">6.025</td>
+<td class="gt_row gt_right" headers="upper">6.476</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left gt_striped" headers="par"><b>σ<sub></sub></b></td>
-<td class="gt_row gt_right gt_striped" headers="estimate">2.011</td>
-<td class="gt_row gt_right gt_striped" headers="lower">1.856</td>
-<td class="gt_row gt_right gt_striped" headers="upper">2.178</td>
+<td class="gt_row gt_right gt_striped" headers="estimate">2.068</td>
+<td class="gt_row gt_right gt_striped" headers="lower">1.909</td>
+<td class="gt_row gt_right gt_striped" headers="upper">2.239</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="par"><b>ξ<sub></sub></b></td>
-<td class="gt_row gt_right" headers="estimate">0.108</td>
-<td class="gt_row gt_right" headers="lower">0.090</td>
-<td class="gt_row gt_right" headers="upper">0.130</td>
+<td class="gt_row gt_right" headers="estimate">0.094</td>
+<td class="gt_row gt_right" headers="lower">0.076</td>
+<td class="gt_row gt_right" headers="upper">0.115</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left gt_striped" headers="par"><b>ρ<sub>1</sub></b></td>
-<td class="gt_row gt_right gt_striped" headers="estimate">0.900</td>
-<td class="gt_row gt_right gt_striped" headers="lower">0.894</td>
-<td class="gt_row gt_right gt_striped" headers="upper">0.905</td>
+<td class="gt_row gt_right gt_striped" headers="estimate">0.898</td>
+<td class="gt_row gt_right gt_striped" headers="lower">0.892</td>
+<td class="gt_row gt_right gt_striped" headers="upper">0.903</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="par"><b>ρ<sub>2</sub></b></td>
-<td class="gt_row gt_right" headers="estimate">0.482</td>
-<td class="gt_row gt_right" headers="lower">0.458</td>
-<td class="gt_row gt_right" headers="upper">0.506</td>
+<td class="gt_row gt_right" headers="estimate">0.487</td>
+<td class="gt_row gt_right" headers="lower">0.463</td>
+<td class="gt_row gt_right" headers="upper">0.510</td>
 </tr>
 </tbody>
 </table>
@@ -1346,726 +1332,108 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 </div>
 </div></div>
 </section>
-<section id="max-step-iid-case" class="slide level2" data-name="Max-and-Smooth">
-<h2>Max-step: IID Case</h2>
-<div style="font-size:65%;">
+<section id="copula-extended-max-and-smooth" class="slide level2" data-name="Copula-Extension">
+<h2>Copula-Extended Max-and-Smooth</h2>
+<div class="columns" style="font-size:60%">
+<h3 id="three-step-approach-with-spatial-dependence">Three-Step Approach with Spatial Dependence</h3>
+<ol type="1">
+<li><strong>Copula Step</strong>: Copula Parameters
 <ul>
-<li><span class="math inline">\(P\)</span>: number of stations, <span class="math inline">\(N\)</span>: replicates at each station</li>
-</ul>
-<p><strong>Independent Likelihood</strong>: Marginal GEV distributions:</p>
-<p><span class="math display">\[
-\ell(\theta|Y) = \sum_{i=1}^P \ell_{\text{GEV}}(Y_{i}|\mu_i,\sigma_i,\xi_i) =
-\sum_{i=1}^P \sum_{j=1}^N \ell_{\text{GEV}}(Y_{ij}|\mu_i,\sigma_i,\xi_i)
-\]</span></p>
-<p><strong>Multivariate Link Function</strong>: <span class="math display">\[
-\mu = e^\psi, \quad \sigma = e^{\psi + \tau}, \quad \xi = g(\phi)
-\]</span></p>
-<p><strong>Key Properties</strong>:</p>
+<li>Estimate copula parameters <span class="math inline">\((\rho_1, \rho_2)\)</span> using empirical CDF</li>
+</ul></li>
+</ol>
+<div class="column" style="width:50%;">
+<ol start="2" type="1">
+<li><strong>Max Step</strong>: Copula-Based Likelihood
 <ul>
-<li><span class="math inline">\(\mathbf Q_{\eta y}\)</span> is a banded matrix</li>
-<li>Parallel processing using L-BFGS with automatic differentiation</li>
-<li>Weak normal priors on transformed parameters</li>
-</ul>
-</div>
-</section>
-<section id="max-step-adding-dependence" class="slide level2">
-<h2>Max-step: Adding Dependence</h2>
-<div style="font-size:65%;">
-<p><strong>Combined Likelihood</strong>: Added Matérn-like Gaussian copula:</p>
-<p><span class="math display">\[
-\begin{gathered}
-\ell(\theta|Y) = \sum_{j=1}^N \left[\sum_{i=1}^P \ell_{\text{GEV}}(Y_{ij}|\mu_i,\sigma_i,\xi_i) + \frac{1}{2}\left(\log|\mathbf{Q}| - Z_j^T\mathbf{Q}Z_j + Z_j^TZ_j\right) \right], \\
-Z_j = \Phi^{-1}(U_j), \qquad
-U_{ij} = F_\mathrm{GEV}(Y_{ij} \vert \mu_i, \sigma_i, \xi_i)
-\end{gathered}
-\]</span></p>
-<p><strong>Key Changes</strong>:</p>
+<li>Joint estimation across replicates (not locations): <span class="math display">\[
+\ell(\theta|Y) = \sum_{t=1}^T \left[\ell_{\text{GEV}}(Y_{t}) + \ell_{\text{copula}}(Z_t)\right]
+\]</span></li>
+<li>Where <span class="math inline">\(Z_t = \Phi^{-1}(F_{\text{GEV}}(Y_t))\)</span></li>
+<li>Precision matrix <span class="math inline">\(\mathbf{Q}\)</span> with parameters <span class="math inline">\(\rho_1, \rho_2, \nu\)</span></li>
+</ul></li>
+</ol>
+</div><div class="column" style="width:50%;">
+<ol start="3" type="1">
+<li><strong>Smooth Step</strong>: Enhanced Spatial Model
 <ul>
-<li><span class="math inline">\(\mathbf Q_{\eta y}\)</span> structure based on <span class="math inline">\(\nu\)</span>, smoothness in the copula</li>
-<li>Parallel processing of replicates instead of stations</li>
-<li><span class="math inline">\(\mathbf Q\)</span> assumed known</li>
-<li>Copula likelihood calculated using sparse representation of <span class="math inline">\(L\)</span></li>
-<li>Acklam’s Algorithm for <span class="math inline">\(\Phi^{-1}\)</span> <span class="citation" data-cites="AcklamInvNorm">[<a href="#/references" role="doc-biblioref" onclick="">16</a>]</span></li>
-</ul>
-</div>
-</section>
-<section id="smooth-step" class="slide level2">
-<h2>Smooth-step</h2>
-<div style="font-size:65%;">
-<p><strong>Gaussian Approximation</strong>: Based on sparse Cholesky factor, <span class="math inline">\(L\)</span>, of <span class="math inline">\(Q_{\eta y}\)</span></p>
-<p><span class="math display">\[
-\log p(\hat\eta \mid \eta, L) = \frac{1}{2}\log|Q_{\eta y}| - \frac{1}{2}\left\|\left(\sum_{i=1}^{n_1n_2}\sum_{j=1}^{\vert \mathcal I(i) \vert} L_{i\mathcal I(i)_j}(\hat\eta_{i\mathcal I(i)_j} - \eta_{i\mathcal I(i)_j})\right)_{i=1}^n\right\|^2
-\]</span></p>
-<p><strong>Spatial Prior</strong>: BYM2 <span class="citation" data-cites="riebler2016 simpson2015">[<a href="#/references" role="doc-biblioref" onclick="">9</a>–<a href="#/references" role="doc-biblioref" onclick="">10</a>]</span> model for each GEV parameter <span class="math inline">\(k\)</span></p>
-<p><span class="math display">\[
-\eta_k = \mu_k\mathbf{1} + \sigma_k(\sqrt{\rho_k/c} \cdot \eta^{\mathrm{spatial}}_k + \sqrt{1-\rho_k}\cdot\eta^{\mathrm{random}}_k),
-\]</span></p>
-<p>where <span class="math inline">\(c\)</span> is a scaling factor chosen so <span class="math inline">\(E_{\mathrm{geo}}\left[\mathrm{Var}(\eta^{\text{spatial}}_k)\right] = 1\)</span></p>
-<p><strong>Prior Specifications</strong>:</p>
-<div class="columns">
-<div class="column" style="width:60%;">
-<ul>
-<li><span class="math inline">\(\eta^{\text{spatial}}_k \sim \text{ICAR}\)</span> <span class="citation" data-cites="besag1991">[<a href="#/references" role="doc-biblioref" onclick="">8</a>]</span> with sum-to-zero constraint</li>
-<li><span class="math inline">\(\eta^{\text{random}}_k \sim N(0,1)\)</span></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<ul>
-<li><span class="math inline">\(\sigma_k \sim \text{Exp}(1)\)</span></li>
-<li><span class="math inline">\(\rho_k \sim \text{Beta}(1,1)\)</span></li>
-</ul>
-</div></div>
-</div>
-</section>
-<section id="gaussian-copula-1" class="slide level2" data-name="Results">
-<h2>Gaussian Copula</h2>
-<div class="cell">
-<div class="cell-output-display">
-<div id="mvytjoypkp" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#mvytjoypkp table {
-  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-#mvytjoypkp thead, #mvytjoypkp tbody, #mvytjoypkp tfoot, #mvytjoypkp tr, #mvytjoypkp td, #mvytjoypkp th {
-  border-style: none;
-}
-
-#mvytjoypkp p {
-  margin: 0;
-  padding: 0;
-}
-
-#mvytjoypkp .gt_table {
-  display: table;
-  border-collapse: collapse;
-  line-height: normal;
-  margin-left: auto;
-  margin-right: auto;
-  color: #333333;
-  font-size: 16px;
-  font-weight: normal;
-  font-style: normal;
-  background-color: #FFFFFF;
-  width: auto;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #A8A8A8;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #A8A8A8;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_caption {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-#mvytjoypkp .gt_title {
-  color: #333333;
-  font-size: 125%;
-  font-weight: initial;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-color: #FFFFFF;
-  border-bottom-width: 0;
-}
-
-#mvytjoypkp .gt_subtitle {
-  color: #333333;
-  font-size: 85%;
-  font-weight: initial;
-  padding-top: 3px;
-  padding-bottom: 5px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-color: #FFFFFF;
-  border-top-width: 0;
-}
-
-#mvytjoypkp .gt_heading {
-  background-color: #FFFFFF;
-  text-align: center;
-  border-bottom-color: #FFFFFF;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_bottom_border {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_col_headings {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_col_heading {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 6px;
-  padding-left: 5px;
-  padding-right: 5px;
-  overflow-x: hidden;
-}
-
-#mvytjoypkp .gt_column_spanner_outer {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 4px;
-  padding-right: 4px;
-}
-
-#mvytjoypkp .gt_column_spanner_outer:first-child {
-  padding-left: 0;
-}
-
-#mvytjoypkp .gt_column_spanner_outer:last-child {
-  padding-right: 0;
-}
-
-#mvytjoypkp .gt_column_spanner {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  overflow-x: hidden;
-  display: inline-block;
-  width: 100%;
-}
-
-#mvytjoypkp .gt_spanner_row {
-  border-bottom-style: hidden;
-}
-
-#mvytjoypkp .gt_group_heading {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  text-align: left;
-}
-
-#mvytjoypkp .gt_empty_group_heading {
-  padding: 0.5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: middle;
-}
-
-#mvytjoypkp .gt_from_md > :first-child {
-  margin-top: 0;
-}
-
-#mvytjoypkp .gt_from_md > :last-child {
-  margin-bottom: 0;
-}
-
-#mvytjoypkp .gt_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  margin: 10px;
-  border-top-style: solid;
-  border-top-width: 1px;
-  border-top-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  overflow-x: hidden;
-}
-
-#mvytjoypkp .gt_stub {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mvytjoypkp .gt_stub_row_group {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-  vertical-align: top;
-}
-
-#mvytjoypkp .gt_row_group_first td {
-  border-top-width: 2px;
-}
-
-#mvytjoypkp .gt_row_group_first th {
-  border-top-width: 2px;
-}
-
-#mvytjoypkp .gt_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mvytjoypkp .gt_first_summary_row {
-  border-top-style: solid;
-  border-top-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_first_summary_row.thick {
-  border-top-width: 2px;
-}
-
-#mvytjoypkp .gt_last_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_grand_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mvytjoypkp .gt_first_grand_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-style: double;
-  border-top-width: 6px;
-  border-top-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_last_grand_summary_row_top {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: double;
-  border-bottom-width: 6px;
-  border-bottom-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_striped {
-  background-color: rgba(128, 128, 128, 0.05);
-}
-
-#mvytjoypkp .gt_table_body {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_footnotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_footnote {
-  margin: 0px;
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mvytjoypkp .gt_sourcenotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#mvytjoypkp .gt_sourcenote {
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mvytjoypkp .gt_left {
-  text-align: left;
-}
-
-#mvytjoypkp .gt_center {
-  text-align: center;
-}
-
-#mvytjoypkp .gt_right {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-#mvytjoypkp .gt_font_normal {
-  font-weight: normal;
-}
-
-#mvytjoypkp .gt_font_bold {
-  font-weight: bold;
-}
-
-#mvytjoypkp .gt_font_italic {
-  font-style: italic;
-}
-
-#mvytjoypkp .gt_super {
-  font-size: 65%;
-}
-
-#mvytjoypkp .gt_footnote_marks {
-  font-size: 75%;
-  vertical-align: 0.4em;
-  position: initial;
-}
-
-#mvytjoypkp .gt_asterisk {
-  font-size: 100%;
-  vertical-align: 0;
-}
-
-#mvytjoypkp .gt_indent_1 {
-  text-indent: 5px;
-}
-
-#mvytjoypkp .gt_indent_2 {
-  text-indent: 10px;
-}
-
-#mvytjoypkp .gt_indent_3 {
-  text-indent: 15px;
-}
-
-#mvytjoypkp .gt_indent_4 {
-  text-indent: 20px;
-}
-
-#mvytjoypkp .gt_indent_5 {
-  text-indent: 25px;
-}
-
-#mvytjoypkp .katex-display {
-  display: inline-flex !important;
-  margin-bottom: 0.75em !important;
-}
-
-#mvytjoypkp div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
-  height: 0px !important;
-}
-</style>
-
-<table class="gt_table caption-top" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
-<caption>Benchmarking how long it takes to evaluate the density of a Mátern(ν)-like field with correlation parameter ρ, either unscaled or scaled to have unit marginal variance</caption>
-<colgroup>
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 11%">
-</colgroup>
-<thead>
-<tr class="gt_col_headings gt_spanner_row header">
-<th class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="col"></th>
-<th colspan="3" id="Unscaled" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
-Unscaled
-</div></th>
-<th colspan="5" id="Scaled" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
-Scaled
-</div></th>
-</tr>
-<tr class="gt_col_headings gt_spanner_row even">
-<th rowspan="2" id="Grid" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Grid</th>
-<th rowspan="2" id="Cholesky-(Unscaled)" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Cholesky</th>
-<th colspan="2" id="Eigen" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
-Eigen
-</div></th>
-<th rowspan="2" id="eig" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Eigen</th>
-<th colspan="2" id="Circulant" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
-Circulant
-</div></th>
-<th colspan="2" id="Folded" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><div class="gt_column_spanner">
-Folded
-</div></th>
-</tr>
-<tr class="gt_col_headings header">
-<th id="Eigen-(Unscaled)" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Time</th>
-<th id="sp_3" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Relative</th>
-<th id="circ" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Time</th>
-<th id="sp_1" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Relative</th>
-<th id="fol" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Time</th>
-<th id="sp_2" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Relative</th>
-</tr>
-</thead>
-<tbody class="gt_table_body">
-<tr class="odd">
-<td class="gt_row gt_left" headers="Grid">20x20</td>
-<td class="gt_row gt_left" headers="Cholesky (Unscaled)">312.56µs</td>
-<td class="gt_row gt_left" headers="Eigen (Unscaled)">155.88µs</td>
-<td class="gt_row gt_right" headers="sp_3">49.9%</td>
-<td class="gt_row gt_left" headers="eig">235.59µs</td>
-<td class="gt_row gt_left" headers="circ">36.2µs</td>
-<td class="gt_row gt_right" headers="sp_1">15.4%</td>
-<td class="gt_row gt_left" headers="fol">115.09µs</td>
-<td class="gt_row gt_right" headers="sp_2">48.9%</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left gt_striped" headers="Grid">40x40</td>
-<td class="gt_row gt_left gt_striped" headers="Cholesky (Unscaled)">1.77ms</td>
-<td class="gt_row gt_left gt_striped" headers="Eigen (Unscaled)">543.76µs</td>
-<td class="gt_row gt_right gt_striped" headers="sp_3">30.7%</td>
-<td class="gt_row gt_left gt_striped" headers="eig">1.65ms</td>
-<td class="gt_row gt_left gt_striped" headers="circ">115.8µs</td>
-<td class="gt_row gt_right gt_striped" headers="sp_1">7.0%</td>
-<td class="gt_row gt_left gt_striped" headers="fol">300.9µs</td>
-<td class="gt_row gt_right gt_striped" headers="sp_2">18.3%</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Grid">60x60</td>
-<td class="gt_row gt_left" headers="Cholesky (Unscaled)">6.33ms</td>
-<td class="gt_row gt_left" headers="Eigen (Unscaled)">1.8ms</td>
-<td class="gt_row gt_right" headers="sp_3">28.5%</td>
-<td class="gt_row gt_left" headers="eig">7.1ms</td>
-<td class="gt_row gt_left" headers="circ">188.48µs</td>
-<td class="gt_row gt_right" headers="sp_1">2.7%</td>
-<td class="gt_row gt_left" headers="fol">609.71µs</td>
-<td class="gt_row gt_right" headers="sp_2">8.6%</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left gt_striped" headers="Grid">80x80</td>
-<td class="gt_row gt_left gt_striped" headers="Cholesky (Unscaled)">17.98ms</td>
-<td class="gt_row gt_left gt_striped" headers="Eigen (Unscaled)">5.17ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_3">28.8%</td>
-<td class="gt_row gt_left gt_striped" headers="eig">21.96ms</td>
-<td class="gt_row gt_left gt_striped" headers="circ">338.15µs</td>
-<td class="gt_row gt_right gt_striped" headers="sp_1">1.5%</td>
-<td class="gt_row gt_left gt_striped" headers="fol">1.26ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_2">5.7%</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Grid">100x100</td>
-<td class="gt_row gt_left" headers="Cholesky (Unscaled)">38.58ms</td>
-<td class="gt_row gt_left" headers="Eigen (Unscaled)">11.48ms</td>
-<td class="gt_row gt_right" headers="sp_3">29.8%</td>
-<td class="gt_row gt_left" headers="eig">48.44ms</td>
-<td class="gt_row gt_left" headers="circ">445.14µs</td>
-<td class="gt_row gt_right" headers="sp_1">0.9%</td>
-<td class="gt_row gt_left" headers="fol">2.37ms</td>
-<td class="gt_row gt_right" headers="sp_2">4.9%</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left gt_striped" headers="Grid">120x120</td>
-<td class="gt_row gt_left gt_striped" headers="Cholesky (Unscaled)">81.1ms</td>
-<td class="gt_row gt_left gt_striped" headers="Eigen (Unscaled)">22.74ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_3">28.0%</td>
-<td class="gt_row gt_left gt_striped" headers="eig">88.45ms</td>
-<td class="gt_row gt_left gt_striped" headers="circ">719.55µs</td>
-<td class="gt_row gt_right gt_striped" headers="sp_1">0.8%</td>
-<td class="gt_row gt_left gt_striped" headers="fol">2.82ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_2">3.2%</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Grid">140x140</td>
-<td class="gt_row gt_left" headers="Cholesky (Unscaled)">145.26ms</td>
-<td class="gt_row gt_left" headers="Eigen (Unscaled)">32.55ms</td>
-<td class="gt_row gt_right" headers="sp_3">22.4%</td>
-<td class="gt_row gt_left" headers="eig">168.38ms</td>
-<td class="gt_row gt_left" headers="circ">965.71µs</td>
-<td class="gt_row gt_right" headers="sp_1">0.6%</td>
-<td class="gt_row gt_left" headers="fol">5.39ms</td>
-<td class="gt_row gt_right" headers="sp_2">3.2%</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left gt_striped" headers="Grid">160x160</td>
-<td class="gt_row gt_left gt_striped" headers="Cholesky (Unscaled)">233.03ms</td>
-<td class="gt_row gt_left gt_striped" headers="Eigen (Unscaled)">54.51ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_3">23.4%</td>
-<td class="gt_row gt_left gt_striped" headers="eig">260.7ms</td>
-<td class="gt_row gt_left gt_striped" headers="circ">1.27ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_1">0.5%</td>
-<td class="gt_row gt_left gt_striped" headers="fol">5.33ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_2">2.0%</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Grid">180x180</td>
-<td class="gt_row gt_left" headers="Cholesky (Unscaled)">359.21ms</td>
-<td class="gt_row gt_left" headers="Eigen (Unscaled)">97.4ms</td>
-<td class="gt_row gt_right" headers="sp_3">27.1%</td>
-<td class="gt_row gt_left" headers="eig">482.93ms</td>
-<td class="gt_row gt_left" headers="circ">1.61ms</td>
-<td class="gt_row gt_right" headers="sp_1">0.3%</td>
-<td class="gt_row gt_left" headers="fol">10.22ms</td>
-<td class="gt_row gt_right" headers="sp_2">2.1%</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left gt_striped" headers="Grid">200x200</td>
-<td class="gt_row gt_left gt_striped" headers="Cholesky (Unscaled)">567.01ms</td>
-<td class="gt_row gt_left gt_striped" headers="Eigen (Unscaled)">147.51ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_3">26.0%</td>
-<td class="gt_row gt_left gt_striped" headers="eig">676.53ms</td>
-<td class="gt_row gt_left gt_striped" headers="circ">1.84ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_1">0.3%</td>
-<td class="gt_row gt_left gt_striped" headers="fol">8.62ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_2">1.3%</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="Grid">220x220</td>
-<td class="gt_row gt_left" headers="Cholesky (Unscaled)">791.13ms</td>
-<td class="gt_row gt_left" headers="Eigen (Unscaled)">206.13ms</td>
-<td class="gt_row gt_right" headers="sp_3">26.1%</td>
-<td class="gt_row gt_left" headers="eig">994.11ms</td>
-<td class="gt_row gt_left" headers="circ">2.59ms</td>
-<td class="gt_row gt_right" headers="sp_1">0.3%</td>
-<td class="gt_row gt_left" headers="fol">13.55ms</td>
-<td class="gt_row gt_right" headers="sp_2">1.4%</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left gt_striped" headers="Grid">240x240</td>
-<td class="gt_row gt_left gt_striped" headers="Cholesky (Unscaled)">1.07s</td>
-<td class="gt_row gt_left gt_striped" headers="Eigen (Unscaled)">287ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_3">26.8%</td>
-<td class="gt_row gt_left gt_striped" headers="eig">1.34s</td>
-<td class="gt_row gt_left gt_striped" headers="circ">2.82ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_1">0.2%</td>
-<td class="gt_row gt_left gt_striped" headers="fol">14.77ms</td>
-<td class="gt_row gt_right gt_striped" headers="sp_2">1.1%</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-</section>
-<section id="max-and-smooth-1" class="slide level2">
-<h2>Max-and-Smooth</h2>
-<div class="columns">
-<div class="column" style="width:45%;">
-<p><br> <br></p>
-<p><img data-src="images/post_bym2.png"></p>
-</div><div class="column" style="width:55%;">
-<p><img data-src="images/comparison.png" style="margin-top:-80px;"></p>
+<li>Unchanged Gaussian approximation: <span class="math display">\[
+\hat{\eta} \mid \eta \sim N(\eta, \mathbf{Q}_{\eta y}^{-1})
+\]</span></li>
+<li>Now <span class="math inline">\(\mathbf{Q}_{\eta y}\)</span> includes dependence information from copula</li>
+<li>Parameter-level spatial priors: <span class="math display">\[
+\eta \mid \theta \sim N(0, \mathbf{Q}_\eta(\theta)^{-1})
+\]</span></li>
+</ul></li>
+</ol>
 </div></div>
 </section>
+<section id="computational-implementation-1" class="slide level2">
+<h2>Computational Implementation</h2>
+<section id="efficient-three-stage-implementation" style="font-size:65%">
+<h3>Efficient Three-Stage Implementation</h3>
+<p><strong>Copula Step (recently finished)</strong></p>
+<ul>
+<li>Use <code>eigen</code> in C++ for efficient calculations as shown before</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>Max Step (TMB)</strong></p>
+<ul>
+<li>Template Model Builder <span class="citation" data-cites="kristensen2016">[<a href="#/references" role="doc-biblioref" onclick="">5</a>]</span> for maximum likelihood</li>
+<li>Automatic differentiation</li>
+<li>Parallel processing of station-wise estimates</li>
+<li>Efficient sparse Hessians</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><strong>Smooth Step (Stan)</strong></p>
+<ul>
+<li>Full Bayesian posterior via HMC <span class="citation" data-cites="carpenter2017">[<a href="#/references" role="doc-biblioref" onclick="">6</a>]</span></li>
+<li>BYM2 spatial prior implementation</li>
+<li>Scales well to large number of parameters</li>
+<li>Use <code>csr_times_vector()</code> for data-level likelihood</li>
+</ul>
+</div></div>
+<ol type="1">
+<li>Estimate copula parameters using R package in development</li>
+<li>Get MLEs and Hessians from TMB</li>
+<li>Pass <span class="math inline">\(\hat \eta\)</span> and CSR version of <span class="math inline">\(L_{\eta y}\)</span> into Stan</li>
+<li>Stan gives full posterior of Gaussian-Gaussian model</li>
+</ol>
+</section>
+</section>
+<section id="results" class="slide level2">
+<h2>Results</h2>
+
+<img data-src="images/copula/max_smooth_compare_densities.png" class="r-stretch"></section>
+<section id="section-2" class="slide level2">
+<h2></h2>
+
+<img data-src="images/copula/max_smooth_compare_station_scatterplot.png" class="r-stretch"></section>
+<section id="section-3" class="slide level2">
+<h2></h2>
+
+<img data-src="images/copula/location_unconstrained_spatial.png" class="r-stretch"></section>
+<section id="section-4" class="slide level2">
+<h2></h2>
+
+<img data-src="images/copula/location_constrained_spatial.png" class="r-stretch"></section>
+<section id="section-5" class="slide level2">
+<h2></h2>
+
+<img data-src="images/copula/scale_unconstrained_spatial.png" class="r-stretch"></section>
+<section id="section-6" class="slide level2">
+<h2></h2>
+
+<img data-src="images/copula/scale_constrained_spatial.png" class="r-stretch"></section>
+<section id="section-7" class="slide level2">
+<h2></h2>
+
+<img data-src="images/copula/shape_unconstrained_spatial.png" class="r-stretch"></section>
+<section id="section-8" class="slide level2">
+<h2></h2>
+
+<img data-src="images/copula/shape_constrained_spatial.png" class="r-stretch"></section>
 <section id="references" class="title-slide slide level1 smaller scrollable">
 <h1>References</h1>
 <div id="refs" class="references csl-bib-body" style="font-size:55%" data-entry-spacing="0" role="list">
@@ -2081,41 +1449,26 @@ Folded
 <div id="ref-johannesson2021" class="csl-entry" role="listitem">
 <div class="csl-left-margin">4. </div><div class="csl-right-inline">Á. V. Johannesson, S. Siegert, R. Huser, H. Bakka, &amp; B. Hrafnkelsson, Approximate bayesian inference for analysis of spatio-temporal flood frequency data. (2021). https://doi.org/<a href="https://doi.org/10.48550/arXiv.1907.04763">10.48550/arXiv.1907.04763</a>.</div>
 </div>
-<div id="ref-rue2001" class="csl-entry" role="listitem">
-<div class="csl-left-margin">5. </div><div class="csl-right-inline">H. Rue, Fast sampling of Gaussian Markov random fields. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, <strong>63</strong> (2001) 325–338. https://doi.org/<a href="https://doi.org/10.1111/1467-9868.00288">10.1111/1467-9868.00288</a>.</div>
+<div id="ref-kristensen2016" class="csl-entry" role="listitem">
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">K. Kristensen, A. Nielsen, C. W. Berg, H. Skaug, &amp; B. M. Bell, <span>TMB</span>: <span>Automatic Differentiation</span> and <span>Laplace Approximation</span>. <em>Journal of Statistical Software</em>, <strong>70</strong> (2016) 1–21. https://doi.org/<a href="https://doi.org/10.18637/jss.v070.i05">10.18637/jss.v070.i05</a>.</div>
 </div>
-<div id="ref-rue2005" class="csl-entry" role="listitem">
-<div class="csl-left-margin">6. </div><div class="csl-right-inline">H. Rue &amp; L. Held, <em>Gaussian Markov Random Fields: Theory and Applications</em> (CRC Press, 2005).</div>
-</div>
-<div id="ref-besag1974" class="csl-entry" role="listitem">
-<div class="csl-left-margin">7. </div><div class="csl-right-inline">J. Besag, <a href="https://www.jstor.org/stable/2984812">Spatial interaction and the statistical analysis of lattice systems</a>. <em>Journal of the Royal Statistical Society. Series B (Methodological)</em>, <strong>36</strong> (1974) 192–236.</div>
-</div>
-<div id="ref-besag1991" class="csl-entry" role="listitem">
-<div class="csl-left-margin">8. </div><div class="csl-right-inline">J. Besag, J. York, &amp; A. Mollié, Bayesian image restoration, with two applications in spatial statistics. <em>Annals of the Institute of Statistical Mathematics</em>, <strong>43</strong> (1991) 1–20. https://doi.org/<a href="https://doi.org/10.1007/BF00116466">10.1007/BF00116466</a>.</div>
-</div>
-<div id="ref-riebler2016" class="csl-entry" role="listitem">
-<div class="csl-left-margin">9. </div><div class="csl-right-inline">A. Riebler, S. H. Sørbye, D. Simpson, &amp; H. Rue, <a href="https://journals.sagepub.com/doi/full/10.1177/0962280216660421">An intuitive bayesian spatial model for disease mapping that accounts for scaling</a>. (2016).</div>
-</div>
-<div id="ref-simpson2015" class="csl-entry" role="listitem">
-<div class="csl-left-margin">10. </div><div class="csl-right-inline">D. P. Simpson, H. Rue, T. G. Martins, A. Riebler, &amp; S. H. Sørbye, <a href="http://arxiv.org/abs/1403.4630">Penalising model component complexity: A principled, practical approach to constructing priors</a>. (2015).</div>
+<div id="ref-carpenter2017" class="csl-entry" role="listitem">
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">B. Carpenter, A. Gelman, M. D. Hoffman, D. Lee, B. Goodrich, M. Betancourt, M. A. Brubaker, J. Guo, P. Li, &amp; A. Riddell, Stan: <span>A Probabilistic Programming Language</span>. <em>Journal of statistical software</em>, <strong>76</strong> (2017) 1. https://doi.org/<a href="https://doi.org/10.18637/jss.v076.i01">10.18637/jss.v076.i01</a>.</div>
 </div>
 <div id="ref-lindgren2011" class="csl-entry" role="listitem">
-<div class="csl-left-margin">11. </div><div class="csl-right-inline">F. Lindgren, H. Rue, &amp; J. Lindström, An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, <strong>73</strong> (2011) 423–498. https://doi.org/<a href="https://doi.org/10.1111/j.1467-9868.2011.00777.x">10.1111/j.1467-9868.2011.00777.x</a>.</div>
+<div class="csl-left-margin">7. </div><div class="csl-right-inline">F. Lindgren, H. Rue, &amp; J. Lindström, An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, <strong>73</strong> (2011) 423–498. https://doi.org/<a href="https://doi.org/10.1111/j.1467-9868.2011.00777.x">10.1111/j.1467-9868.2011.00777.x</a>.</div>
 </div>
 <div id="ref-rue2005a" class="csl-entry" role="listitem">
-<div class="csl-left-margin">12. </div><div class="csl-right-inline">H. Rue, Marginal variances for gaussian markov random fields. (2005).</div>
+<div class="csl-left-margin">8. </div><div class="csl-right-inline">H. Rue, Marginal variances for gaussian markov random fields. (2005).</div>
 </div>
 <div id="ref-rue2007" class="csl-entry" role="listitem">
-<div class="csl-left-margin">13. </div><div class="csl-right-inline">Hå. Rue &amp; S. Martino, Approximate bayesian inference for hierarchical gaussian markov random field models. <em>Journal of Statistical Planning and Inference</em>, <strong>137</strong> (2007) 3177–3192. https://doi.org/<a href="https://doi.org/10.1016/j.jspi.2006.07.016">10.1016/j.jspi.2006.07.016</a>.</div>
+<div class="csl-left-margin">9. </div><div class="csl-right-inline">Hå. Rue &amp; S. Martino, Approximate bayesian inference for hierarchical gaussian markov random field models. <em>Journal of Statistical Planning and Inference</em>, <strong>137</strong> (2007) 3177–3192. https://doi.org/<a href="https://doi.org/10.1016/j.jspi.2006.07.016">10.1016/j.jspi.2006.07.016</a>.</div>
 </div>
 <div id="ref-rue2009" class="csl-entry" role="listitem">
-<div class="csl-left-margin">14. </div><div class="csl-right-inline">H. Rue, S. Martino, &amp; N. Chopin, Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, <strong>71</strong> (2009) 319–392. https://doi.org/<a href="https://doi.org/10.1111/j.1467-9868.2008.00700.x">10.1111/j.1467-9868.2008.00700.x</a>.</div>
+<div class="csl-left-margin">10. </div><div class="csl-right-inline">H. Rue, S. Martino, &amp; N. Chopin, Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, <strong>71</strong> (2009) 319–392. https://doi.org/<a href="https://doi.org/10.1111/j.1467-9868.2008.00700.x">10.1111/j.1467-9868.2008.00700.x</a>.</div>
 </div>
 <div id="ref-horn1991" class="csl-entry" role="listitem">
-<div class="csl-left-margin">15. </div><div class="csl-right-inline">R. A. Horn &amp; C. R. Johnson, <em><a href="https://www.cambridge.org/core/books/topics-in-matrix-analysis/B988495A235F1C3406EA484A2C477B03">Topics in matrix analysis</a></em> (Cambridge: Cambridge University Press, 1991).</div>
-</div>
-<div id="ref-AcklamInvNorm" class="csl-entry" role="listitem">
-<div class="csl-left-margin">16. </div><div class="csl-right-inline">P. J. Acklam, <a href="https://web.archive.org/web/20151030215612/http://home.online.no/~pjacklam/notes/invnorm/">Algorithm for the inverse normal distribution function</a>. (2003).</div>
+<div class="csl-left-margin">11. </div><div class="csl-right-inline">R. A. Horn &amp; C. R. Johnson, <em><a href="https://www.cambridge.org/core/books/topics-in-matrix-analysis/B988495A235F1C3406EA484A2C477B03">Topics in matrix analysis</a></em> (Cambridge: Cambridge University Press, 1991).</div>
 </div>
 </div>
 
