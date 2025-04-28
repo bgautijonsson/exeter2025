@@ -294,6 +294,7 @@ Brynjólfur Gauti Guðrúnar Jónsson
 </section>
 <section id="latent-gaussian-models-lgms" class="slide level2" data-name="LGMs">
 <h2>Latent Gaussian Models (LGMs)</h2>
+<div style="font-size:80%">
 <ul>
 <li><strong>Three-level hierarchy</strong>
 <ol type="1">
@@ -308,9 +309,11 @@ Brynjólfur Gauti Guðrúnar Jónsson
 \]</span></li>
 <li><strong>Why LGMs?</strong> Massive dimensionality, yet fast inference via sparsity and conjugacy.</li>
 </ul>
+</div>
 </section>
 <section id="lgms-a-concrete-example" class="slide level2">
 <h2>LGMs: A Concrete Example</h2>
+<div style="font-size:80%">
 <ul>
 <li><strong>GEV model for precipitation extremes</strong>
 <ol type="1">
@@ -325,9 +328,11 @@ Brynjólfur Gauti Guðrúnar Jónsson
 \]</span></li>
 <li><strong>Why this matters:</strong> Location-specific location parameter with spatial dependence, while maintaining computational tractability for 43,920 locations.</li>
 </ul>
+</div>
 </section>
 <section id="extended-lgms-multivariate-link-functions" class="slide level2">
 <h2>Extended LGMs — multivariate link functions</h2>
+<div style="font-size:80%">
 <ul>
 <li>Need to model several distributional parameters jointly (e.g., location, scale and shape in GEV).<br>
 </li>
@@ -337,9 +342,11 @@ Brynjólfur Gauti Guðrúnar Jónsson
 <span class="math display">\[\eta_{m} = X_m\beta_m + A_m u_m + \varepsilon_m,\quad m=1,\dots,M\]</span></li>
 <li>Greatly increases flexibility for spatio-temporal extremes and joint risk metrics.</li>
 </ul>
+</div>
 </section>
 <section id="extended-lgms---gev-example" class="slide level2">
 <h2>Extended LGMs - GEV Example</h2>
+<div style="font-size:80%">
 <ul>
 <li><strong>Joint GEV model for precipitation extremes</strong>
 <ol type="1">
@@ -352,9 +359,11 @@ Brynjólfur Gauti Guðrúnar Jónsson
 <li><em>Hyper-parameters:</em> <span class="math inline">\(\theta =\)</span> f.ex. mean, range, variance, spatial correlation</li>
 </ol></li>
 </ul>
+</div>
 </section>
 <section id="max-and-smooth-big-picture" class="slide level2" data-name="Max-and-Smooth">
 <h2>Max-and-Smooth — big picture</h2>
+<div style="font-size:80%">
 <ul>
 <li><strong>Goal:</strong> accurate but <em>fast</em> Bayesian inference for (extended) LGMs with many replicates.<br>
 </li>
@@ -366,23 +375,27 @@ Brynjólfur Gauti Guðrúnar Jónsson
 </ol></li>
 <li>Good when each group/location has many replicates (MLE asymptotically Gaussian)</li>
 </ul>
+</div>
 </section>
 <section id="max-step-gaussian-likelihood-surrogate" class="slide level2">
 <h2>Max step — Gaussian likelihood surrogate</h2>
+<div style="font-size:80%">
 <ul>
 <li>Loop over locations: estimate GEV parameters and observed information (Hessian) at each site</li>
 <li>For each location, <span class="math inline">\(i\)</span>:
 <ul>
-<li>Find MLE <span class="math inline">\(\hat\eta_i\)</span> and observed information <span class="math inline">\(I_{\eta\i y_i}\)</span>.<br>
+<li>Find MLE <span class="math inline">\(\hat\eta_i\)</span> and observed information <span class="math inline">\(I_{\eta_i y_i}\)</span>.<br>
 <span class="math display">\[
 \hat L(\eta_i\mid y_i)=\mathcal N\!\bigl(\eta_i\mid\hat\eta_i,\;I_{\eta_i y_i}^{-1}\bigr)
 \]</span></li>
 </ul></li>
 <li>Gather all MLEs into vector, <span class="math inline">\(\hat \eta\)</span>, arrange Hessians into <span class="math inline">\(Q_{\eta y}\)</span></li>
 </ul>
+</div>
 </section>
 <section id="smooth-step-gaussiangaussian-posterior" class="slide level2">
 <h2>Smooth step — Gaussian–Gaussian posterior</h2>
+<div style="font-size:80%">
 <p>Hierarchical pseudo-model <span class="math display">\[
 \begin{aligned}
 \hat\eta &amp;\mid \eta \;\sim\; \mathcal N\bigl(\eta, Q_{\eta y}^{-1}\bigr) \\
@@ -394,6 +407,7 @@ Brynjólfur Gauti Guðrúnar Jónsson
 <li>Data-level likelihood uses MLEs and estimated Hessians</li>
 <li>Latent level applies spatial smoothing</li>
 </ul>
+</div>
 </section>
 <section id="max-and-smooth" class="slide level2">
 <h2>Max-and-Smooth</h2>
@@ -455,9 +469,9 @@ p(\eta, \theta \mid \hat{\eta}) \propto p(\hat{\eta} \mid \eta)p(\eta \mid \thet
 </ul>
 </div></div>
 <ol type="1">
-<li>Get MLEs and Hessians from TMB</li>
-<li>Pass <span class="math inline">\(\hat \eta\)</span> and CSR version of <span class="math inline">\(L_{\eta y}\)</span> into Stan</li>
-<li>Stan gives full posterior of Gaussian-Gaussian model</li>
+<li>Get MLEs and Hessians from TMB (7s on 70x91 UKCP over Island of Ireland)</li>
+<li>Pass <span class="math inline">\(\hat \eta\)</span> and CSR version of <span class="math inline">\(L_{\eta y}\)</span> into Stan (39s)</li>
+<li>Stan gives full posterior of Gaussian-Gaussian model (10m)</li>
 </ol>
 </section>
 </section>
