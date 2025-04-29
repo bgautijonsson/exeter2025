@@ -120,7 +120,7 @@ library(evd)
 ::: {style="font-size:80%"}
 - **Joint GEV model for precipitation extremes**  
   1) *Data:* $y_i \mid \mu_i, \sigma_i, \xi_i \sim \text{GEV}(\mu_i, \sigma_i, \xi_i)$  
-  2) *Latent field:* $\boldsymbol\eta_i = \begin{pmatrix} (\psi_1, \tau_1, \phi_1)^T \\  \vdots \\ (\psi_n, \tau_n, \phi_n)^T \end{pmatrix}  \sim \mathcal{N}(\boldsymbol{\mu}(\theta), \mathbf{Q}^{-1}(\theta))$ 
+  2) *Latent field:* $\boldsymbol\eta_i = \begin{pmatrix} (\psi_1, \tau_1, \phi_1)^\intercal \\  \vdots \\ (\psi_n, \tau_n, \phi_n)^\intercal \end{pmatrix}  \sim \mathcal{N}(\boldsymbol{\mu}(\theta), \mathbf{Q}^{-1}(\theta))$ 
 
   $\qquad(\psi_i, \tau_i, \phi_i) = (\log \mu_i, \log \sigma_i - \log \mu_i, f(\xi_i))$
   3) *Hyper-parameters:* $\theta =$ f.ex. mean, range, variance, spatial correlation
