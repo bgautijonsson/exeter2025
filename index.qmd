@@ -141,12 +141,12 @@ library(evd)
 
 ::: {style="font-size:80%"}
 - Loop over locations: estimate GEV parameters and observed information (Hessian) at each site
-- For each location, $i$:
+- For each location $i$:
     - Find MLE $\hat\eta_i$ and observed information $I_{\eta_i y_i}$.  
 $$
 \hat L(\eta_i\mid y_i)=\mathcal N\!\bigl(\eta_i\mid\hat\eta_i,\;I_{\eta_i y_i}^{-1}\bigr)
 $$
-- Gather all MLEs into vector, $\hat \eta$, arrange Hessians into $Q_{\eta y}$
+- Gather all MLEs into vector $\hat \eta$ arrange Hessians into $Q_{\eta y}$
 ::: 
 
 
