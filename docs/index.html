@@ -731,7 +731,7 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 <span id="cb2-12"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div></div>
-<div style="font-size:65%">
+<div style="font-size:60%">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>bench<span class="sc">::</span><span class="fu">mark</span>(</span>
 <span id="cb3-2"><a href=""></a>  <span class="st">"solve"</span> <span class="ot">=</span> <span class="fu">solve</span>(Q) <span class="sc">|&gt;</span> <span class="fu">diag</span>() <span class="sc">|&gt;</span> <span class="fu">sqrt</span>() <span class="sc">|&gt;</span> <span class="fu">sort</span>(),</span>
@@ -805,14 +805,13 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 <span id="cb6-2"><a href=""></a>  mu <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="dv">1</span>])</span>
 <span id="cb6-3"><a href=""></a>  sigma <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="dv">2</span>] <span class="sc">+</span> par[<span class="dv">1</span>])</span>
 <span id="cb6-4"><a href=""></a>  xi <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="dv">3</span>])</span>
-<span id="cb6-5"><a href=""></a>  rho1 <span class="ot">&lt;-</span> <span class="fu">plogis</span>(par[<span class="dv">4</span>])</span>
-<span id="cb6-6"><a href=""></a>  rho2 <span class="ot">&lt;-</span> <span class="fu">plogis</span>(par[<span class="dv">5</span>])</span>
-<span id="cb6-7"><a href=""></a>  u <span class="ot">&lt;-</span> evd<span class="sc">::</span><span class="fu">pgev</span>(Y, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi)</span>
-<span id="cb6-8"><a href=""></a>  z <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(u)</span>
-<span id="cb6-9"><a href=""></a>  ll_marg <span class="ot">&lt;-</span> <span class="fu">sum</span>(evd<span class="sc">::</span><span class="fu">dgev</span>(Y, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi, <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb6-10"><a href=""></a>  ll_copula <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">dmatern_copula_eigen</span>(z, dim1, dim2, rho1, rho2, nu))</span>
-<span id="cb6-11"><a href=""></a>  ll_copula <span class="sc">+</span> ll_marg</span>
-<span id="cb6-12"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-5"><a href=""></a>  rho1 <span class="ot">&lt;-</span> <span class="fu">plogis</span>(par[<span class="dv">4</span>]); rho2 <span class="ot">&lt;-</span> <span class="fu">plogis</span>(par[<span class="dv">5</span>])</span>
+<span id="cb6-6"><a href=""></a>  u <span class="ot">&lt;-</span> evd<span class="sc">::</span><span class="fu">pgev</span>(Y, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi)</span>
+<span id="cb6-7"><a href=""></a>  z <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(u)</span>
+<span id="cb6-8"><a href=""></a>  ll_marg <span class="ot">&lt;-</span> <span class="fu">sum</span>(evd<span class="sc">::</span><span class="fu">dgev</span>(Y, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi, <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb6-9"><a href=""></a>  ll_copula <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">dmatern_copula_eigen</span>(z, dim1, dim2, rho1, rho2, nu))</span>
+<span id="cb6-10"><a href=""></a>  ll_copula <span class="sc">+</span> ll_marg</span>
+<span id="cb6-11"><a href=""></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Optimize</strong></p>
 <div class="cell">

@@ -549,7 +549,7 @@ msd <- function(Q1, Q2) {
 :::
 :::
 
-::: {style="font-size:65%"}
+::: {style="font-size:60%"}
 ```{r}
 #| echo: true
 #| cache: true
@@ -629,8 +629,7 @@ log_lik <- function(par, Y) {
   mu <- exp(par[1])
   sigma <- exp(par[2] + par[1])
   xi <- exp(par[3])
-  rho1 <- plogis(par[4])
-  rho2 <- plogis(par[5])
+  rho1 <- plogis(par[4]); rho2 <- plogis(par[5])
   u <- evd::pgev(Y, loc = mu, scale = sigma, shape = xi)
   z <- qnorm(u)
   ll_marg <- sum(evd::dgev(Y, loc = mu, scale = sigma, shape = xi, log = TRUE))
