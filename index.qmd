@@ -192,7 +192,7 @@ $$
 $$
    - Latent field prior:
 $$
-\eta \mid \theta \sim N(0, \mathbf{Q}_\eta(\theta)^{-1})
+\eta \mid \theta \sim N(\boldsymbol \mu(\theta), \mathbf{Q}_\eta(\theta)^{-1})
 $$
    - Hyperprior: $p(\theta)$
 :::
