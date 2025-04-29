@@ -579,7 +579,7 @@ $$
 $$
 \mathbf{z}^T\mathbf{Q}\mathbf{z} = \sum_{k=1}^{n_1n_2}\lambda_k \left(v_k^T\mathbf z\right)^2 = 
 \sum_{i=1}^{n_1}\sum_{j=2}^{n_2} 
-\left(\left\{\lambda_{\rho_1}\right\}_i + \left\{\lambda_{\rho_2}\right\}_j\right)
+\left(\left\{\lambda_{\rho_1}\right\}_i + \left\{\lambda_{\rho_2}\right\}_j\right)^{\nu + 1}
 \left[\left(\left\{\mathbf{v}_{\rho_1}\right\}_i \otimes \left\{\mathbf{v}_{\rho_2}\right\}_j\right)^T\mathbf z\right]^2
 $$
 :::
@@ -748,6 +748,17 @@ tibble(
 :::
 :::
 
+## Hessians
+
+::: {.columns}
+::: {.column width="50%"}
+![](images/iid/hessian.png)
+:::
+::: {.column width="50%"}
+![](images/copula/hessian.png)
+:::
+:::
+
 ## Computational Implementation
 
 ::: {style="font-size:65%"}
@@ -813,6 +824,38 @@ tibble(
 ##
 
 ![](images/copula/shape_constrained_spatial.png)
+
+## Summary and Conclusions
+
+::: {style="font-size:65%"}
+
+::: {.columns}
+::: {.column width="50%"}
+**Methodology**
+
+- Copula-Extended Latent Gaussian Models
+- Matérn-like Gaussian copula implementation
+- Max-and-Smooth for fast large-scale inference
+:::
+
+::: {.column width="50%"}
+**Computational Implementation**
+
+- Three-stage pipeline combining specialized tools:
+  1. Copula parameter estimation
+  2. TMB for ML and sparse Hessians
+  3. Stan for fast Gaussian-Gaussian posterior sampling
+:::
+:::
+
+**Future Direction**
+
+- Application to full UKCP Local Projections (5km grid)
+- Extension to linear predictors and space-time dependence
+- t-copula for tail dependence
+- Integration with risk assessment frameworks
+- Further software development and R package release
+:::
 
 # References
 

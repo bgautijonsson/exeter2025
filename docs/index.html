@@ -764,7 +764,7 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 <p><span class="math display">\[
 \mathbf{z}^T\mathbf{Q}\mathbf{z} = \sum_{k=1}^{n_1n_2}\lambda_k \left(v_k^T\mathbf z\right)^2 =
 \sum_{i=1}^{n_1}\sum_{j=2}^{n_2}
-\left(\left\{\lambda_{\rho_1}\right\}_i + \left\{\lambda_{\rho_2}\right\}_j\right)
+\left(\left\{\lambda_{\rho_1}\right\}_i + \left\{\lambda_{\rho_2}\right\}_j\right)^{\nu + 1}
 \left[\left(\left\{\mathbf{v}_{\rho_1}\right\}_i \otimes \left\{\mathbf{v}_{\rho_2}\right\}_j\right)^T\mathbf z\right]^2
 \]</span></p>
 </div>
@@ -1382,6 +1382,15 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 </ol>
 </div></div>
 </section>
+<section id="hessians" class="slide level2">
+<h2>Hessians</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="images/iid/hessian.png"></p>
+</div><div class="column" style="width:50%;">
+<p><img data-src="images/copula/hessian.png"></p>
+</div></div>
+</section>
 <section id="computational-implementation-1" class="slide level2">
 <h2>Computational Implementation</h2>
 <section id="efficient-three-stage-implementation" style="font-size:65%">
@@ -1448,6 +1457,38 @@ A Matérn field <span class="math inline">\(x(\mathbf{s})\)</span> in continuous
 <h2></h2>
 
 <img data-src="images/copula/shape_constrained_spatial.png" class="r-stretch"></section>
+<section id="summary-and-conclusions" class="slide level2">
+<h2>Summary and Conclusions</h2>
+<div style="font-size:65%">
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>Methodology</strong></p>
+<ul>
+<li>Copula-Extended Latent Gaussian Models</li>
+<li>Matérn-like Gaussian copula implementation</li>
+<li>Max-and-Smooth for fast large-scale inference</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><strong>Computational Implementation</strong></p>
+<ul>
+<li>Three-stage pipeline combining specialized tools:
+<ol type="1">
+<li>Copula parameter estimation</li>
+<li>TMB for ML and sparse Hessians</li>
+<li>Stan for fast Gaussian-Gaussian posterior sampling</li>
+</ol></li>
+</ul>
+</div></div>
+<p><strong>Future Direction</strong></p>
+<ul>
+<li>Application to full UKCP Local Projections (5km grid)</li>
+<li>Extension to linear predictors and space-time dependence</li>
+<li>t-copula for tail dependence</li>
+<li>Integration with risk assessment frameworks</li>
+<li>Further software development and R package release</li>
+</ul>
+</div>
+</section>
 <section id="references" class="title-slide slide level1 smaller scrollable">
 <h1>References</h1>
 <div id="refs" class="references csl-bib-body" style="font-size:55%" data-entry-spacing="0" role="list">
