@@ -19,6 +19,7 @@ revealjs-plugins:
   - simplemenu
 bibliography: references.bib
 csl: cambridge-university-press-numeric.csl
+image: images/copula/max_smooth_station_scatterplot.png
 ---
 
 ```{r}
