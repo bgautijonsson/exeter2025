@@ -232,9 +232,9 @@ where $\eta$ is the latent field, $\theta$ are hyperparameters, and $\hat{\eta}$
 - Use `csr_times_vector()` for data-level likelihood
 :::
 :::
-1. Get MLEs and Hessians from TMB (7s on 70x91 UKCP over Island of Ireland)
-2. Pass $\hat \eta$ and CSR version of $L_{\eta y}$ into Stan (39s)
-3. Stan gives full posterior of Gaussian-Gaussian model (10m)
+1. Get MLEs and Hessians from TMB
+2. Pass $\hat \eta$ and CSR version of $L_{\eta y}$ into Stan
+3. Stan gives full posterior of Gaussian-Gaussian model
 :::
 
 ## Max vs. Smooth
