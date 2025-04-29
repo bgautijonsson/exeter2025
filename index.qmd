@@ -67,8 +67,8 @@ library(evd)
     -   Four parameters per location as in [@johannesson2021]
         -   Location, Trend, Scale, Shape
 -   Two aspects of spatial dependence:
-    1.  Parameter-level (Latent Gaussian Models)
-    2.  Data-level dependence (Copulas)
+    1.  Parameter-level *(Latent Gaussian Models)*
+    2.  Data-level *(Copulas)*
 :::
 
 ::: {.column width="30%"}
